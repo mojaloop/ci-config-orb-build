@@ -44,6 +44,7 @@ workflows:
           context: orb-publishing
           filters: *release-filters
       - orb-tools/pack:
+          name: pack-dev
           filters: *dev-filters
       - orb-tools/publish:
           orb_name: mojaloop/build
@@ -51,7 +52,7 @@ workflows:
           pub_type: dev
           # Ensure this job requires all test jobs and the pack job.
           requires:
-            - orb-tools/pack
+            - pack-dev
             - build/setup
           context: orb-publishing
           filters: *dev-filters
