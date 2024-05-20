@@ -1,5 +1,5 @@
 {
-  "name": "ci-config-orb-build",
+  "name": "@mojaloop/ci-config-orb-build",
   "version": "1.0.0",
   "description": "Test orb for CircleCI",
   "main": "index.js",
