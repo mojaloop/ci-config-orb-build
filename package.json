@@ -1,0 +1,9 @@
+{
+  "name": "ci-config-orb-build",
+  "version": "1.0.0",
+  "description": "Test orb for CircleCI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Dummy test\""
+  }
+}
