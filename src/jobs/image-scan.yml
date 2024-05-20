@@ -1,3 +1,5 @@
+description: |
+  This job scans the Docker image for vulnerabilities using Anchore.
 executor: anchore/anchore_engine
 shell: /bin/sh -leo pipefail ## Ref: https://circleci.com/docs/env-vars/#alpine-linux
 environment:

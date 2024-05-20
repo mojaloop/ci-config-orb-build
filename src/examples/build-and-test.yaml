@@ -1,6 +1,8 @@
 description: >
   Build and publish nodejs projects to npm and docker.
 usage:
+  version: 2.1
+
   orbs:
     build: mojaloop/build@1.0.0
 

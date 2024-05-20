@@ -1,3 +1,5 @@
+description: |
+  This job runs the license-scanner to check the licenses of the dependencies.
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main

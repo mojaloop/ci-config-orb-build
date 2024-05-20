@@ -3,4 +3,10 @@ version: 2.1
 description: mojaloop/build is a CircleCI orb for build jobs in Mojaloop CI/CD pipelines
 display:
   home_url: "https://mojaloop.io"
-  source_url: "https://github.com/mojaloop/ci-config-build-orb/blob/main/src/@orb.yaml"
+  source_url: "https://github.com/mojaloop/ci-config-build-orb"
+
+orbs:
+  anchore: anchore/anchore-engine@1.9.0
+  slack: circleci/slack@4.12.5 # Ref: https://github.com/mojaloop/ci-config/tree/main/slack-templates
+  pr-tools: mojaloop/pr-tools@0.1.10 # Ref: https://github.com/mojaloop/ci-config/
+  gh: circleci/github-cli@2.2.0

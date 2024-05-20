@@ -1,3 +1,5 @@
+description: >
+  Setup node.js and install dependencies.
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main

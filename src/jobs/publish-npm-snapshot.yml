@@ -1,3 +1,5 @@
+description: |
+  This job publishes a snapshot pre-release to NPM.
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main

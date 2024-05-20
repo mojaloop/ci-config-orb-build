@@ -1,3 +1,4 @@
+description: Run code coverage check
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main

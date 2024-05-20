@@ -1,3 +1,6 @@
+description: |
+  This job is responsible for scanning the licenses of the docker image
+  built in the previous job.
 executor: machine
 environment:
   MAIN_BRANCH_NAME: main

@@ -1,3 +1,5 @@
+description: |
+  This job publishes to npm.
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main

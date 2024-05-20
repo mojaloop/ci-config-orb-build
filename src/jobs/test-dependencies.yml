@@ -1,13 +1,14 @@
-test-dependencies:
-  executor: docker
-  environment:
-    MAIN_BRANCH_NAME: main
-  steps:
-    - docker-dependencies
-    - checkout
-    - configure-nvm
-    - display-versions
-    - restore-cache
-    - run:
-        name: Execute dependency tests
-        command: npm run dep:check
+description: >
+  This job tests the project's dependencies.
+executor: docker
+environment:
+  MAIN_BRANCH_NAME: main
+steps:
+  - docker-dependencies
+  - checkout
+  - configure-nvm
+  - display-versions
+  - restore-cache
+  - run:
+      name: Execute dependency tests
+      command: npm run dep:check

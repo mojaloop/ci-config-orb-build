@@ -1,3 +1,5 @@
+description: |
+  This job publishes a pre-release to NPM.
 executor: machine
 environment:
   MAIN_BRANCH_NAME: main
