@@ -1,0 +1,10 @@
+description: >
+  This is a sample executor using Docker and Node. If you want to provide a custom environment in your orb, insert your image here.
+  If you do not require an executor, you can simply delete this directory.
+working_directory: /home/circleci/project
+shell: "/bin/sh -leo pipefail" ## Ref: https://circleci.com/docs/env-vars/#alpine-linux
+environment:
+  BASH_ENV: /etc/profile ## Ref: https://circleci.com/docs/env-vars/#alpine-linux
+  NVM_ARCH_UNOFFICIAL_OVERRIDE: x64-musl ## Ref: https://github.com/nvm-sh/nvm/issues/1102#issuecomment-550572252
+docker:
+  - image: node:lts-alpine # Ref: https://hub.docker.com/_/node?tab=tags&page=1&name=alpine

@@ -1,0 +1,51 @@
+steps:
+  - run:
+      name: Configure NVM
+      command: |
+        cd $HOME
+        export ENV_DOT_PROFILE=$HOME/.profile
+        touch $ENV_DOT_PROFILE
+        echo "1. Check/Set NVM_DIR env variable"
+        if [ -z "$NVM_DIR" ]; then
+          export NVM_DIR="$HOME/.nvm"
+          echo "==> NVM_DIR has been exported - $NVM_DIR"
+        else
+          echo "==> NVM_DIR already exists - $NVM_DIR"
+        fi
+        echo "2. Check/Set NVMRC_VERSION env variable"
+        if [ -z "$NVMRC_VERSION" ]; then
+          echo "==> Configuring NVMRC_VERSION!"
+          export NVMRC_VERSION=$(cat $CIRCLE_WORKING_DIRECTORY/.nvmrc)
+          echo "export NVMRC_VERSION=$NVMRC_VERSION" >> $ENV_DOT_PROFILE
+        fi
+        echo "3. Configure NVM"
+        ## Lets check if an existing NVM_DIR exists, if it does lets skil
+        if [ -e "$NVM_DIR" ]; then
+          echo "==> $NVM_DIR exists. Skipping steps 3!"
+          # echo "5. Executing $NVM_DIR/nvm.sh"
+          # [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        else
+          echo "==> $NVM_DIR does not exists. Executing steps 4-5!"
+          echo "4. Installing NVM"
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+          echo "5. Executing $NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        fi
+        ## Ref: https://github.com/nvm-sh/nvm/issues/1102#issuecomment-550572252
+        if [ ! -z "$NVM_ARCH_UNOFFICIAL_OVERRIDE" ]; then
+          echo "==> Handle NVM_ARCH_UNOFFICIAL_OVERRIDE=$NVM_ARCH_UNOFFICIAL_OVERRIDE!"
+          echo "nvm_get_arch() { nvm_echo \"${NVM_ARCH_UNOFFICIAL_OVERRIDE}\"; }" >> $ENV_DOT_PROFILE
+          echo "export NVM_NODEJS_ORG_MIRROR=https://unofficial-builds.nodejs.org/download/release" >> $ENV_DOT_PROFILE
+          source $ENV_DOT_PROFILE
+        fi
+        echo "6. Setup Node version"
+        if [ -n "$NVMRC_VERSION" ]; then
+          echo "==> Installing Node version: $NVMRC_VERSION"
+          nvm install $NVMRC_VERSION
+          nvm alias default $NVMRC_VERSION
+          nvm use $NVMRC_VERSION
+          cd $CIRCLE_WORKING_DIRECTORY
+        else
+          echo "==> ERROR - NVMRC_VERSION has not been set! - NVMRC_VERSION: $NVMRC_VERSION"
+          exit 1
+        fi

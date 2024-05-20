@@ -1,0 +1,9 @@
+steps:
+  - run:
+      name: Display Versions
+      command: |
+        echo "What is the active version of Nodejs?"
+        echo "node: $(node --version)"
+        echo "yarn: $(yarn --version)"
+        echo "npm: $(npm --version)"
+        echo "nvm: $(nvm --version)"

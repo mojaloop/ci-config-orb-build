@@ -1,0 +1,34 @@
+executor: docker
+environment:
+  MAIN_BRANCH_NAME: main
+steps:
+  - docker-dependencies
+  - checkout
+  - restore-cache
+  - run:
+      name: Setup for SNAPSHOT release
+      command: |
+        echo "export RELEASE_TAG=${RELEASE_TAG_SNAPSHOT}" >> $BASH_ENV
+        echo "RELEASE_TAG=${RELEASE_TAG_SNAPSHOT}"
+        echo "Override package version: ${CIRCLE_TAG:1}"
+        npx standard-version --skip.tag --skip.commit --skip.changelog --release-as ${CIRCLE_TAG:1}
+        PACKAGE_VERSION=$(cat package-lock.json | jq -r .version)
+        echo "export PACKAGE_VERSION=${PACKAGE_VERSION}" >> $BASH_ENV
+        echo "PACKAGE_VERSION=${PACKAGE_VERSION}"
+  - run:
+      name: Setup Slack config
+      command: |
+        echo "export SLACK_PROJECT_NAME=${CIRCLE_PROJECT_REPONAME}" >> $BASH_ENV
+        echo "export SLACK_RELEASE_TYPE='NPM Snapshot'" >> $BASH_ENV
+        echo "export SLACK_RELEASE_TAG=v${CIRCLE_TAG:1}" >> $BASH_ENV
+        echo "export SLACK_RELEASE_URL=https://www.npmjs.com/package/@mojaloop/${CIRCLE_PROJECT_REPONAME}/v/${CIRCLE_TAG:1}" >> $BASH_ENV
+        echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
+        echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
+  - npm-auth
+  - npm-publish
+  - slack/notify:
+      event: pass
+      template: SLACK_TEMP_RELEASE_SUCCESS
+  - slack/notify:
+      event: fail
+      template: SLACK_TEMP_RELEASE_FAILURE

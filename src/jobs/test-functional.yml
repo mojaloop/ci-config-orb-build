@@ -1,0 +1,16 @@
+executor: machine
+environment:
+  ML_CORE_TEST_HARNESS_DIR: /tmp/ml-core-test-harness
+steps:
+  - checkout
+  - attach_workspace:
+      at: /tmp
+  - run:
+      name: Load the pre-built docker image from workspace
+      command: docker load -i /tmp/docker-image.tar
+  - run:
+      name: Execute TTK functional tests
+      command: bash ./test/scripts/test-functional.sh
+  - store_artifacts:
+      path: /tmp/ml-core-test-harness/reports
+      destination: test

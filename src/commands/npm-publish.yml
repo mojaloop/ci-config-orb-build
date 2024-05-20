@@ -1,0 +1,7 @@
+steps:
+  - run:
+      name: Publish NPM $RELEASE_TAG artifact
+      command: |
+        source $BASH_ENV
+        echo "Publishing tag $RELEASE_TAG"
+        npm publish --tag $RELEASE_TAG --access public

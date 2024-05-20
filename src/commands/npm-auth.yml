@@ -1,0 +1,4 @@
+steps:
+  - run:
+      name: Update NPM registry auth token
+      command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc

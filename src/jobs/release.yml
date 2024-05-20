@@ -1,0 +1,25 @@
+executor: docker
+environment:
+  MAIN_BRANCH_NAME: main
+steps:
+  - docker-dependencies
+  - checkout
+  - restore-cache
+  - configure-git
+  - run:
+      name: Setup Slack config
+      command: |
+        echo "export SLACK_PROJECT_NAME=${CIRCLE_PROJECT_REPONAME}" >> $BASH_ENV
+        echo "export SLACK_RELEASE_TYPE='GitHub Release'" >> $BASH_ENV
+        echo "export SLACK_RELEASE_TAG='${RELEASE_TAG} on ${CIRCLE_BRANCH} branch'" >> $BASH_ENV
+        echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
+        echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
+  - run:
+      name: Generate changelog and bump package version
+      command: npm run release -- --no-verify
+  - run:
+      name: Push the release
+      command: git push --follow-tags origin ${CIRCLE_BRANCH}
+  - slack/notify:
+      event: fail
+      template: SLACK_TEMP_RELEASE_FAILURE

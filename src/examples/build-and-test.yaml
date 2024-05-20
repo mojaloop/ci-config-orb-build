@@ -1,0 +1,259 @@
+description: >
+  Build and publish nodejs projects to npm and docker.
+usage:
+  orbs:
+    build: mojaloop/build@1.0.0
+
+  workflows:
+    build_and_test:
+      jobs:
+        - pr-tools/pr-title-check:
+            context: org-global
+        - build/setup:
+            context: org-global
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                ignore:
+                  - /feature*/
+                  - /bugfix*/
+        - build/test-dependencies:
+            context: org-global
+            requires:
+              - build/setup
+            filters:
+              tags:
+                ignore: /.*/
+              branches:
+                ignore:
+                  - main
+        - build/test-lint:
+            context: org-global
+            requires:
+              - build/setup
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                ignore:
+                  - /feature*/
+                  - /bugfix*/
+        - build/test-unit:
+            context: org-global
+            requires:
+              - build/setup
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                ignore:
+                  - /feature*/
+                  - /bugfix*/
+        - build/test-coverage:
+            context: org-global
+            requires:
+              - build/setup
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                ignore:
+                  - /feature*/
+                  - /bugfix*/
+        - build/test-integration:
+            context: org-global
+            requires:
+              - build/setup
+              - build/build-local
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                ignore:
+                  - /feature*/
+                  - /bugfix*/
+        - build/test-functional:
+            context: org-global
+            requires:
+              - build/setup
+              - build/build-local
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                ignore:
+                  - /feature*/
+                  - /bugfix*/
+        - build/vulnerability-check:
+            context: org-global
+            requires:
+              - build/setup
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                ignore:
+                  - /feature*/
+                  - /bugfix*/
+        - build/audit-licenses:
+            context: org-global
+            requires:
+              - build/setup
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                ignore:
+                  - /feature*/
+                  - /bugfix*/
+        - build/build-local:
+            context: org-global
+            requires:
+              - build/setup
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                ignore:
+                  - /feature*/
+                  - /bugfix*/
+        - build/license-scan:
+            context: org-global
+            requires:
+              - build/build-local
+            filters:
+              tags:
+                only: /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+)?)?(\-hotfix(\.[0-9]+)?)?(\-perf(\.[0-9]+)?)?/
+              branches:
+                ignore:
+                  - /.*/
+        - build/image-scan:
+            context: org-global
+            requires:
+              - build/build-local
+            filters:
+              tags:
+                only: /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+)?)?(\-hotfix(\.[0-9]+)?)?(\-perf(\.[0-9]+)?)?/
+              branches:
+                ignore:
+                  - /.*/
+        # New commits to main release automatically
+        - build/release:
+            context: org-global
+            requires:
+              - pr-tools/pr-title-check
+              - build/test-lint
+              - build/test-unit
+              - build/test-coverage
+              - build/test-integration
+              - build/test-functional
+              - build/vulnerability-check
+              - build/audit-licenses
+              - build/license-scan
+              - build/image-scan
+            filters:
+              branches:
+                only:
+                  - main
+                  - /release\/v.*/
+        - build/github-release:
+            context: org-global
+            requires:
+              - build/release
+            filters:
+              branches:
+                only:
+                  - main
+                  - /release\/v.*/
+        - build/publish-docker:
+            context: org-global
+            requires:
+              - build/build-local
+              - pr-tools/pr-title-check
+              - build/test-lint
+              - build/test-unit
+              - build/test-coverage
+              - build/test-integration
+              - build/test-functional
+              - build/vulnerability-check
+              - build/audit-licenses
+              - build/license-scan
+              - build/image-scan
+            filters:
+              tags:
+                only: /v[0-9]+(\.[0-9]+)*/
+              branches:
+                ignore:
+                  - /.*/
+        - build/publish-docker-snapshot:
+            context: org-global
+            requires:
+              - build/build-local
+              - pr-tools/pr-title-check
+              - build/test-lint
+              - build/test-unit
+              - build/test-coverage
+              - build/test-integration
+              - build/test-functional
+              - build/vulnerability-check
+              - build/audit-licenses
+              - build/license-scan
+              - build/image-scan
+            filters:
+              tags:
+                only: /v[0-9]+(\.[0-9]+)*\-snapshot+((\.[0-9]+)?)/
+              branches:
+                ignore:
+                  - /.*/
+        - build/publish-npm:
+            context: org-global
+            requires:
+              - pr-tools/pr-title-check
+              - build/test-lint
+              - build/test-unit
+              - build/test-coverage
+              - build/test-integration
+              - build/test-functional
+              - build/vulnerability-check
+              - build/audit-licenses
+              - build/license-scan
+              - build/image-scan
+            filters:
+              tags:
+                only: /v[0-9]+(\.[0-9]+)*/
+              branches:
+                ignore:
+                  - /.*/
+        - build/publish-npm-snapshot:
+            context: org-global
+            requires:
+              - pr-tools/pr-title-check
+              - build/test-lint
+              - build/test-unit
+              - build/test-coverage
+              - build/test-integration
+              - build/test-functional
+              - build/vulnerability-check
+              - build/audit-licenses
+              - build/license-scan
+              - build/image-scan
+            filters:
+              tags:
+                only: /v[0-9]+(\.[0-9]+)*\-snapshot+((\.[0-9]+)?)/
+              branches:
+                ignore:
+                  - /.*/
+        - build/publish-prerelease:
+            context: org-global
+            requires:
+              - pr-tools/pr-title-check
+              - build/test-lint
+              - build/test-unit
+              - build/test-coverage
+              - build/vulnerability-check
+              - build/audit-licenses
+            filters:
+              branches:
+                only:
+                  - /(major|minor|patch)/.*/

@@ -1,0 +1,41 @@
+executor: machine
+shell: "/bin/bash -eo pipefail"
+environment:
+  MAIN_BRANCH_NAME: main
+steps:
+  - run:
+      name: Install git
+      command: |
+        sudo apt-get update && sudo apt-get install -y git
+  - gh/install
+  - checkout
+  - configure-git
+  - run:
+      name: Fetch updated release branch
+      command: |
+        git fetch origin
+        git checkout origin/${CIRCLE_BRANCH}
+  - export-version-from-package
+  - run:
+      name: Check the release changes
+      command: |
+        echo "Changes are: ${RELEASE_CHANGES}"
+  - run:
+      name: Setup Slack config
+      command: |
+        echo "export SLACK_PROJECT_NAME=${CIRCLE_PROJECT_REPONAME}" >> $BASH_ENV
+        echo "export SLACK_RELEASE_TYPE='Github Release'" >> $BASH_ENV
+        echo "export SLACK_RELEASE_TAG=v${RELEASE_TAG}" >> $BASH_ENV
+        echo "export SLACK_RELEASE_URL=https://github.com/mojaloop/${CIRCLE_PROJECT_REPONAME}/releases/tag/v${RELEASE_TAG}" >> $BASH_ENV
+        echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
+        echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
+  - run:
+      name: Create Release
+      command: |
+        gh release create "v${RELEASE_TAG}" --title "v${RELEASE_TAG} Release" --draft=false --notes "${RELEASE_CHANGES}" ./CHANGELOG.md
+  - slack/notify:
+      event: pass
+      template: SLACK_TEMP_RELEASE_SUCCESS
+  - slack/notify:
+      event: fail
+      template: SLACK_TEMP_RELEASE_FAILURE

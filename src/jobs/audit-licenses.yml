@@ -1,0 +1,14 @@
+executor: docker
+environment:
+  MAIN_BRANCH_NAME: main
+steps:
+  - docker-dependencies
+  - license-scanner
+  - checkout
+  - restore-cache
+  - run:
+      name: Run the license-scanner
+      command: cd /tmp/license-scanner && pathToRepo=$CIRCLE_WORKING_DIRECTORY make run
+  - store_artifacts:
+      path: /tmp/license-scanner/results
+      destination: licenses

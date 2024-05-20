@@ -1,0 +1,15 @@
+executor: docker
+environment:
+  MAIN_BRANCH_NAME: main
+steps:
+  - docker-dependencies
+  - checkout
+  - configure-nvm
+  - display-versions
+  - run:
+      name: Update NPM install
+      command: npm ci
+  - save_cache:
+      key: dependency-cache-{{ .Environment.CIRCLE_SHA1 }}
+      paths:
+        - node_modules

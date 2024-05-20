@@ -1,0 +1,5 @@
+steps:
+  - run:
+      name: Install AWS CLI dependencies
+      command: |
+        apk --no-cache add aws-cli

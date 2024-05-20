@@ -1,0 +1,24 @@
+executor: docker
+environment:
+  MAIN_BRANCH_NAME: main
+steps:
+  - docker-dependencies
+  - checkout
+  - configure-nvm
+  - display-versions
+  - restore-cache
+  - run:
+      # This is needed for legacy core tests. Remove this once 'tape' is fully deprecated.
+      name: Install tape, tapes and tap-xunit
+      command: npm install tape tapes tap-xunit
+  - run:
+      name: Create dir for test results
+      command: mkdir -p ./test/results
+  - run:
+      name: Execute unit tests
+      command: npm -s run test:xunit
+  - store_artifacts:
+      path: ./test/results
+      destination: test
+  - store_test_results:
+      path: ./test/results
