@@ -1,3 +1,5 @@
+description: >
+  Install and set up license-scanner
 steps:
   - run:
       name: Install and set up license-scanner

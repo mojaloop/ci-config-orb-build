@@ -1,3 +1,5 @@
+description: >
+  Install general dependencies
 steps:
   - run:
       name: Install general dependencies

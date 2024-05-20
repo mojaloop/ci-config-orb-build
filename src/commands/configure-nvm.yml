@@ -1,3 +1,5 @@
+description:
+  Configure NVM.
 steps:
   - run:
       name: Configure NVM

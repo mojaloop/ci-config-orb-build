@@ -1,3 +1,5 @@
+description: >
+  Install the AWS CLI dependencies.
 steps:
   - run:
       name: Install AWS CLI dependencies

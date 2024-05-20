@@ -1,3 +1,5 @@
+description: >
+  Display the versions of Nodejs, Yarn, NPM, and NVM.
 steps:
   - run:
       name: Display Versions

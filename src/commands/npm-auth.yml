@@ -1,3 +1,5 @@
+description: >
+  Update NPM registry auth token
 steps:
   - run:
       name: Update NPM registry auth token

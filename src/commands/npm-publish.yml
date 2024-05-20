@@ -1,3 +1,5 @@
+description: >
+  Publish the NPM artifact.
 steps:
   - run:
       name: Publish NPM $RELEASE_TAG artifact

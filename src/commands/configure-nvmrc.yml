@@ -1,3 +1,6 @@
+description: |
+  Configure the NVMRC_VERSION environment variable
+  based on the .nvmrc file in the project root directory.
 steps:
   - run:
       name: Configure NVMRC

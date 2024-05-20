@@ -1,3 +1,5 @@
+description: >
+  Configure git.
 steps:
   - run:
       name: Configure git

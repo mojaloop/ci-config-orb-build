@@ -1,3 +1,5 @@
+description: >
+  Restore the cache of dependencies.
 steps:
   - restore_cache:
       keys:

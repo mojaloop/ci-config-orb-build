@@ -1,3 +1,5 @@
+description: >
+  Export the version from the package-lock.json file.
 steps:
   - run:
       name: Format the changelog into the github release body and get release tag
