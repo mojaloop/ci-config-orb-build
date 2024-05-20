@@ -19,6 +19,10 @@ release-filters: &release-filters
   tags:
     only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
 
+dev-filters: &dev-filters
+  branches:
+    only: main
+
 workflows:
   test-deploy:
     jobs:
@@ -37,5 +41,15 @@ workflows:
           requires:
             - orb-tools/pack
             - build/setup
-          context: org-global
+          context: orb-publishing
           filters: *release-filters
+      - orb-tools/publish:
+          orb_name: mojaloop/build
+          vcs_type: << pipeline.project.type >>
+          pub_type: dev
+          # Ensure this job requires all test jobs and the pack job.
+          requires:
+            - orb-tools/pack
+            - build/setup
+          context: orb-publishing
+          filters: *dev-filters
