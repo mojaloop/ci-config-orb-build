@@ -4,7 +4,7 @@ usage:
   version: 2.1
 
   orbs:
-    build: mojaloop/build@1.0.0
+    <orb-name>: <namespace>/<orb-name>@1.0.0
 
   workflows:
     build_and_test:
