@@ -4,10 +4,10 @@ executor: docker
 environment:
   MAIN_BRANCH_NAME: main
 steps:
-  - docker-dependencies
-  - license-scanner
+  - docker_dependencies
+  - license_scanner
   - checkout
-  - restore-cache
+  - restore_cache_command
   - run:
       name: Run the license-scanner
       command: cd /tmp/license-scanner && pathToRepo=$CIRCLE_WORKING_DIRECTORY make run

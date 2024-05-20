@@ -20,7 +20,7 @@ usage:
                 ignore:
                   - /feature*/
                   - /bugfix*/
-        - build/test-dependencies:
+        - build/test_dependencies:
             context: org-global
             requires:
               - build/setup
@@ -30,7 +30,7 @@ usage:
               branches:
                 ignore:
                   - main
-        - build/test-lint:
+        - build/test_lint:
             context: org-global
             requires:
               - build/setup
@@ -41,7 +41,7 @@ usage:
                 ignore:
                   - /feature*/
                   - /bugfix*/
-        - build/test-unit:
+        - build/test_unit:
             context: org-global
             requires:
               - build/setup
@@ -52,7 +52,7 @@ usage:
                 ignore:
                   - /feature*/
                   - /bugfix*/
-        - build/test-coverage:
+        - build/test_coverage:
             context: org-global
             requires:
               - build/setup
@@ -63,11 +63,11 @@ usage:
                 ignore:
                   - /feature*/
                   - /bugfix*/
-        - build/test-integration:
+        - build/test_integration:
             context: org-global
             requires:
               - build/setup
-              - build/build-local
+              - build/build_local
             filters:
               tags:
                 only: /.*/
@@ -75,11 +75,11 @@ usage:
                 ignore:
                   - /feature*/
                   - /bugfix*/
-        - build/test-functional:
+        - build/test_functional:
             context: org-global
             requires:
               - build/setup
-              - build/build-local
+              - build/build_local
             filters:
               tags:
                 only: /.*/
@@ -87,18 +87,7 @@ usage:
                 ignore:
                   - /feature*/
                   - /bugfix*/
-        - build/vulnerability-check:
-            context: org-global
-            requires:
-              - build/setup
-            filters:
-              tags:
-                only: /.*/
-              branches:
-                ignore:
-                  - /feature*/
-                  - /bugfix*/
-        - build/audit-licenses:
+        - build/vulnerability_check:
             context: org-global
             requires:
               - build/setup
@@ -109,7 +98,18 @@ usage:
                 ignore:
                   - /feature*/
                   - /bugfix*/
-        - build/build-local:
+        - build/audit_licenses:
+            context: org-global
+            requires:
+              - build/setup
+            filters:
+              tags:
+                only: /.*/
+              branches:
+                ignore:
+                  - /feature*/
+                  - /bugfix*/
+        - build/build_local:
             context: org-global
             requires:
               - build/setup
@@ -123,7 +123,7 @@ usage:
         - build/license-scan:
             context: org-global
             requires:
-              - build/build-local
+              - build/build_local
             filters:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+)?)?(\-hotfix(\.[0-9]+)?)?(\-perf(\.[0-9]+)?)?/
@@ -133,7 +133,7 @@ usage:
         - build/image-scan:
             context: org-global
             requires:
-              - build/build-local
+              - build/build_local
             filters:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+)?)?(\-hotfix(\.[0-9]+)?)?(\-perf(\.[0-9]+)?)?/
@@ -145,15 +145,15 @@ usage:
             context: org-global
             requires:
               - pr-tools/pr-title-check
-              - build/test-lint
-              - build/test-unit
-              - build/test-coverage
-              - build/test-integration
-              - build/test-functional
-              - build/vulnerability-check
-              - build/audit-licenses
-              - build/license-scan
-              - build/image-scan
+              - build/test_lint
+              - build/test_unit
+              - build/test_coverage
+              - build/test_integration
+              - build/test_functional
+              - build/vulnerability_check
+              - build/audit_licenses
+              - build/license_scan
+              - build/image_scan
             filters:
               branches:
                 only:
@@ -171,17 +171,17 @@ usage:
         - build/publish-docker:
             context: org-global
             requires:
-              - build/build-local
+              - build/build_local
               - pr-tools/pr-title-check
-              - build/test-lint
-              - build/test-unit
-              - build/test-coverage
-              - build/test-integration
-              - build/test-functional
-              - build/vulnerability-check
-              - build/audit-licenses
-              - build/license-scan
-              - build/image-scan
+              - build/test_lint
+              - build/test_unit
+              - build/test_coverage
+              - build/test_integration
+              - build/test_functional
+              - build/vulnerability_check
+              - build/audit_licenses
+              - build/license_scan
+              - build/image_scan
             filters:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*/
@@ -191,17 +191,17 @@ usage:
         - build/publish-docker-snapshot:
             context: org-global
             requires:
-              - build/build-local
+              - build/build_local
               - pr-tools/pr-title-check
-              - build/test-lint
-              - build/test-unit
-              - build/test-coverage
-              - build/test-integration
-              - build/test-functional
-              - build/vulnerability-check
-              - build/audit-licenses
-              - build/license-scan
-              - build/image-scan
+              - build/test_lint
+              - build/test_unit
+              - build/test_coverage
+              - build/test_integration
+              - build/test_functional
+              - build/vulnerability_check
+              - build/audit_licenses
+              - build/license_scan
+              - build/image_scan
             filters:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*\-snapshot+((\.[0-9]+)?)/
@@ -212,15 +212,15 @@ usage:
             context: org-global
             requires:
               - pr-tools/pr-title-check
-              - build/test-lint
-              - build/test-unit
-              - build/test-coverage
-              - build/test-integration
-              - build/test-functional
-              - build/vulnerability-check
-              - build/audit-licenses
-              - build/license-scan
-              - build/image-scan
+              - build/test_lint
+              - build/test_unit
+              - build/test_coverage
+              - build/test_integration
+              - build/test_functional
+              - build/vulnerability_check
+              - build/audit_licenses
+              - build/license_scan
+              - build/image_scan
             filters:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*/
@@ -231,15 +231,15 @@ usage:
             context: org-global
             requires:
               - pr-tools/pr-title-check
-              - build/test-lint
-              - build/test-unit
-              - build/test-coverage
-              - build/test-integration
-              - build/test-functional
-              - build/vulnerability-check
-              - build/audit-licenses
-              - build/license-scan
-              - build/image-scan
+              - build/test_lint
+              - build/test_unit
+              - build/test_coverage
+              - build/test_integration
+              - build/test_functional
+              - build/vulnerability_check
+              - build/audit_licenses
+              - build/license_scan
+              - build/image_scan
             filters:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*\-snapshot+((\.[0-9]+)?)/
@@ -250,11 +250,11 @@ usage:
             context: org-global
             requires:
               - pr-tools/pr-title-check
-              - build/test-lint
-              - build/test-unit
-              - build/test-coverage
-              - build/vulnerability-check
-              - build/audit-licenses
+              - build/test_lint
+              - build/test_unit
+              - build/test_coverage
+              - build/vulnerability_check
+              - build/audit_licenses
             filters:
               branches:
                 only:

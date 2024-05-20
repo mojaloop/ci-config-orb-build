@@ -4,11 +4,11 @@ executor: machine
 environment:
   MAIN_BRANCH_NAME: main
 steps:
-  - machine-dependencies
+  - machine_dependencies
   - checkout
-  - configure-nvm
-  - display-versions
-  - restore-cache
+  - configure_nvm
+  - display_versions
+  - restore_cache_command
   - attach_workspace:
       at: /tmp
   - run:

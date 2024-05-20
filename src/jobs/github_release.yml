@@ -11,13 +11,13 @@ steps:
         sudo apt-get update && sudo apt-get install -y git
   - gh/install
   - checkout
-  - configure-git
+  - configure_git
   - run:
       name: Fetch updated release branch
       command: |
         git fetch origin
         git checkout origin/${CIRCLE_BRANCH}
-  - export-version-from-package
+  - export_version_from_package
   - run:
       name: Check the release changes
       command: |

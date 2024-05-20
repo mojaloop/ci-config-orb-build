@@ -4,10 +4,10 @@ executor: docker
 environment:
   MAIN_BRANCH_NAME: main
 steps:
-  - docker-dependencies
+  - docker_dependencies
   - checkout
-  - restore-cache
-  - configure-git
+  - restore_cache_command
+  - configure_git
   - run:
       name: Setup Slack config
       command: |

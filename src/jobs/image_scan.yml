@@ -16,7 +16,7 @@ steps:
       name: Install docker dependencies for anchore
       command: |
         apk add --update py-pip docker python3-dev libffi-dev openssl-dev gcc libc-dev make jq curl bash
-  - aws-dependencies
+  - aws_dependencies
   - checkout
   - run:
       name: Setup Slack config
@@ -27,9 +27,9 @@ steps:
         echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
         echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
         echo "export SLACK_CUSTOM_MSG='Anchore Image Scan failed for: \`${DOCKER_ORG}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_TAG}\`'" >> $BASH_ENV
-  - configure-nvm
-  - display-versions
-  - docker-dependencies
+  - configure_nvm
+  - display_versions
+  - docker_dependencies
   - run:
       name: Load the pre-built docker image from workspace
       command: docker load -i /tmp/docker-image.tar

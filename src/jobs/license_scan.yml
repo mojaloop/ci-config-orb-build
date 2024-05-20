@@ -10,7 +10,7 @@ steps:
   - run:
       name: Load the pre-built docker image from workspace
       command: docker load -i /tmp/docker-image.tar
-  - license-scanner
+  - license_scanner
   - run:
       name: Run the license-scanner
       command: cd /tmp/license-scanner && mode=docker dockerImages=${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local make run

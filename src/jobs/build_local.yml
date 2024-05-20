@@ -5,8 +5,8 @@ environment:
   MAIN_BRANCH_NAME: main
 steps:
   - checkout
-  - configure-nvmrc
-  - display-versions
+  - configure_nvmrc
+  - display_versions
   - run:
       name: Build Docker local image
       command: |

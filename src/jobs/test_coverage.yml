@@ -3,12 +3,12 @@ executor: docker
 environment:
   MAIN_BRANCH_NAME: main
 steps:
-  - docker-dependencies
-  - aws-dependencies
+  - docker_dependencies
+  - aws_dependencies
   - checkout
-  - configure-nvm
-  - display-versions
-  - restore-cache
+  - configure_nvm
+  - display_versions
+  - restore_cache_command
   - run:
       name: Execute code coverage check
       command: npm -s run test:coverage-check
