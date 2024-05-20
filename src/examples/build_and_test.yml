@@ -120,7 +120,7 @@ usage:
                 ignore:
                   - /feature*/
                   - /bugfix*/
-        - build/license-scan:
+        - build/license_scan:
             context: org-global
             requires:
               - build/build_local
@@ -130,7 +130,7 @@ usage:
               branches:
                 ignore:
                   - /.*/
-        - build/image-scan:
+        - build/image_scan:
             context: org-global
             requires:
               - build/build_local
@@ -158,8 +158,9 @@ usage:
               branches:
                 only:
                   - main
+                  - master
                   - /release\/v.*/
-        - build/github-release:
+        - build/github_release:
             context: org-global
             requires:
               - build/release
@@ -168,7 +169,7 @@ usage:
                 only:
                   - main
                   - /release\/v.*/
-        - build/publish-docker:
+        - build/publish_docker:
             context: org-global
             requires:
               - build/build_local
@@ -188,7 +189,7 @@ usage:
               branches:
                 ignore:
                   - /.*/
-        - build/publish-docker-snapshot:
+        - build/publish_docker-snapshot:
             context: org-global
             requires:
               - build/build_local
@@ -208,7 +209,7 @@ usage:
               branches:
                 ignore:
                   - /.*/
-        - build/publish-npm:
+        - build/publish_npm:
             context: org-global
             requires:
               - pr-tools/pr-title-check
@@ -227,7 +228,7 @@ usage:
               branches:
                 ignore:
                   - /.*/
-        - build/publish-npm-snapshot:
+        - build/publish_npm-snapshot:
             context: org-global
             requires:
               - pr-tools/pr-title-check
@@ -246,7 +247,7 @@ usage:
               branches:
                 ignore:
                   - /.*/
-        - build/publish-prerelease:
+        - build/publish_prerelease:
             context: org-global
             requires:
               - pr-tools/pr-title-check
