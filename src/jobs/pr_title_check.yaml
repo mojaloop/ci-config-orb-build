@@ -1,0 +1,9 @@
+executor: docker
+parameters:
+  ci-config-branch:
+    description: The branch of mojaloop/ci-config to bootstrap from
+    default: master
+    type: string
+steps:
+  - pr_title_check:
+      ci-config-branch: << parameters.ci-config-branch >>

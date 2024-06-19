@@ -9,7 +9,7 @@ usage:
   workflows:
     build_and_test:
       jobs:
-        - pr-tools/pr-title-check:
+        - build/pr_title_check:
             context: org-global
         - build/setup:
             context: org-global
@@ -149,7 +149,7 @@ usage:
                   - master
                   - /release\/v.*/
             requires:
-              - pr-tools/pr-title-check
+              - build/pr_title_check
               - build/test_lint
               - build/test_unit
               - build/test_coverage
@@ -177,7 +177,7 @@ usage:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*/
             requires:
-              - pr-tools/pr-title-check
+              - build/pr_title_check
               - build/test_lint
               - build/test_unit
               - build/test_coverage
@@ -196,7 +196,7 @@ usage:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*\-snapshot+((\.[0-9]+)?)/
             requires:
-              - pr-tools/pr-title-check
+              - build/pr_title_check
               - build/test_lint
               - build/test_unit
               - build/test_coverage
@@ -215,7 +215,7 @@ usage:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*/
             requires:
-              - pr-tools/pr-title-check
+              - build/pr_title_check
               - build/test_lint
               - build/test_unit
               - build/test_coverage
@@ -234,7 +234,7 @@ usage:
               tags:
                 only: /v[0-9]+(\.[0-9]+)*\-snapshot+((\.[0-9]+)?)/
             requires:
-              - pr-tools/pr-title-check
+              - build/pr_title_check
               - build/test_lint
               - build/test_unit
               - build/test_coverage
