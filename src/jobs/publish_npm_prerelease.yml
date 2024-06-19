@@ -1,7 +1,7 @@
 description: |
   This job publishes a pre-release to NPM.
 executor: machine
-shell: /bin/sh -leo pipefail
+shell: /bin/bash -eo pipefail
 environment:
   MAIN_BRANCH_NAME: main
 steps:
@@ -15,7 +15,6 @@ steps:
   - configure_git
   - run:
       name: Setup for pre-release
-      shell: /bin/bash -leo pipefail
       command: |
         if [[ $CIRCLE_BRANCH =~ ^(major|minor|patch)/(.*)$ ]]; then
           echo "export RELEASE_TAG=${BASH_REMATCH[1]}-${BASH_REMATCH[2]}" > /tmp/prerelease.env
