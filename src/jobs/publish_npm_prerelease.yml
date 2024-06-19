@@ -48,8 +48,10 @@ steps:
       paths:
         - prerelease.env
   - slack/notify:
+      shell: /bin/sh -leo pipefail
       event: pass
       template: SLACK_TEMP_RELEASE_SUCCESS
   - slack/notify:
+      shell: /bin/sh -leo pipefail
       event: fail
       template: SLACK_TEMP_RELEASE_FAILURE
