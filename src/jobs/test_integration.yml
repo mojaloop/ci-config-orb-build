@@ -22,7 +22,7 @@ steps:
         npm ci
 
         echo "Running integration tests...."
-        bash ./test/scripts/test-integration.sh
+        npm run test:integration
       environment:
         ENDPOINT_URL: http://localhost:4545/notification
         UV_THREADPOOL_SIZE: 12

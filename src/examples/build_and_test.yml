@@ -14,165 +14,169 @@ usage:
         - build/setup:
             context: org-global
             filters:
-              tags:
-                only: /.*/
               branches:
                 ignore:
                   - /feature*/
                   - /bugfix*/
+              tags:
+                only: /.*/
         - build/test_dependencies:
             context: org-global
-            requires:
-              - build/setup
             filters:
-              tags:
-                ignore: /.*/
               branches:
                 ignore:
                   - main
+              tags:
+                ignore: /.*/
+            requires:
+              - build/setup
         - build/test_lint:
             context: org-global
-            requires:
-              - build/setup
             filters:
-              tags:
-                only: /.*/
               branches:
                 ignore:
                   - /feature*/
                   - /bugfix*/
+              tags:
+                only: /.*/
+            requires:
+              - build/setup
         - build/test_unit:
             context: org-global
-            requires:
-              - build/setup
             filters:
-              tags:
-                only: /.*/
               branches:
                 ignore:
                   - /feature*/
                   - /bugfix*/
+              tags:
+                only: /.*/
+            requires:
+              - build/setup
         - build/test_coverage:
             context: org-global
-            requires:
-              - build/setup
             filters:
-              tags:
-                only: /.*/
               branches:
                 ignore:
                   - /feature*/
                   - /bugfix*/
+              tags:
+                only: /.*/
+            requires:
+              - build/setup
         - build/test_integration:
             context: org-global
-            requires:
-              - build/setup
-              - build/build_local
             filters:
-              tags:
-                only: /.*/
               branches:
                 ignore:
                   - /feature*/
                   - /bugfix*/
+              tags:
+                only: /.*/
+            requires:
+              - build/build_local
         - build/test_functional:
             context: org-global
-            requires:
-              - build/setup
-              - build/build_local
             filters:
-              tags:
-                only: /.*/
               branches:
                 ignore:
                   - /feature*/
                   - /bugfix*/
+              tags:
+                only: /.*/
+            requires:
+              - build/build_local
         - build/vulnerability_check:
             context: org-global
-            requires:
-              - build/setup
             filters:
-              tags:
-                only: /.*/
               branches:
                 ignore:
                   - /feature*/
                   - /bugfix*/
+              tags:
+                only: /.*/
+            requires:
+              - build/setup
         - build/audit_licenses:
             context: org-global
-            requires:
-              - build/setup
             filters:
-              tags:
-                only: /.*/
               branches:
                 ignore:
                   - /feature*/
                   - /bugfix*/
+              tags:
+                only: /.*/
+            requires:
+              - build/setup
         - build/build_local:
             context: org-global
-            requires:
-              - build/setup
             filters:
-              tags:
-                only: /.*/
               branches:
                 ignore:
                   - /feature*/
                   - /bugfix*/
+              tags:
+                only: /.*/
+            requires:
+              - build/setup
         - build/license_scan:
             context: org-global
-            requires:
-              - build/build_local
             filters:
-              tags:
-                only: /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+)?)?(\-hotfix(\.[0-9]+)?)?(\-perf(\.[0-9]+)?)?/
               branches:
                 ignore:
                   - /.*/
+              tags:
+                only: >-
+                  /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+)?)?(\-hotfix(\.[0-9]+)?)?(\-perf(\.[0-9]+)?)?/
+            requires:
+              - build/build_local
         - build/image_scan:
             context: org-global
-            requires:
-              - build/build_local
             filters:
-              tags:
-                only: /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+)?)?(\-hotfix(\.[0-9]+)?)?(\-perf(\.[0-9]+)?)?/
               branches:
                 ignore:
                   - /.*/
-        # New commits to main release automatically
+              tags:
+                only: >-
+                  /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+)?)?(\-hotfix(\.[0-9]+)?)?(\-perf(\.[0-9]+)?)?/
+            requires:
+              - build/build_local
         - build/release:
             context: org-global
-            requires:
-              - pr-tools/pr-title-check
-              - build/test_lint
-              - build/test_unit
-              - build/test_coverage
-              - build/test_integration
-              - build/test_functional
-              - build/vulnerability_check
-              - build/audit_licenses
-              - build/license_scan
-              - build/image_scan
             filters:
               branches:
                 only:
                   - main
                   - master
                   - /release\/v.*/
+            requires:
+              - pr-tools/pr-title-check
+              - build/test_lint
+              - build/test_unit
+              - build/test_coverage
+              - build/test_integration
+              - build/test_functional
+              - build/vulnerability_check
+              - build/audit_licenses
+              - build/license_scan
+              - build/image_scan
         - build/github_release:
             context: org-global
-            requires:
-              - build/release
             filters:
               branches:
                 only:
                   - main
                   - /release\/v.*/
+            requires:
+              - build/release
         - build/publish_docker:
             context: org-global
+            filters:
+              branches:
+                ignore:
+                  - /.*/
+              tags:
+                only: /v[0-9]+(\.[0-9]+)*/
             requires:
-              - build/build_local
               - pr-tools/pr-title-check
               - build/test_lint
               - build/test_unit
@@ -183,16 +187,15 @@ usage:
               - build/audit_licenses
               - build/license_scan
               - build/image_scan
-            filters:
-              tags:
-                only: /v[0-9]+(\.[0-9]+)*/
-              branches:
-                ignore:
-                  - /.*/
         - build/publish_docker_snapshot:
             context: org-global
+            filters:
+              branches:
+                ignore:
+                  - /.*/
+              tags:
+                only: /v[0-9]+(\.[0-9]+)*\-snapshot+((\.[0-9]+)?)/
             requires:
-              - build/build_local
               - pr-tools/pr-title-check
               - build/test_lint
               - build/test_unit
@@ -203,67 +206,34 @@ usage:
               - build/audit_licenses
               - build/license_scan
               - build/image_scan
-            filters:
-              tags:
-                only: /v[0-9]+(\.[0-9]+)*\-snapshot+((\.[0-9]+)?)/
-              branches:
-                ignore:
-                  - /.*/
         - build/publish_npm:
             context: org-global
-            requires:
-              - pr-tools/pr-title-check
-              - build/test_lint
-              - build/test_unit
-              - build/test_coverage
-              - build/test_integration
-              - build/test_functional
-              - build/vulnerability_check
-              - build/audit_licenses
-              - build/license_scan
-              - build/image_scan
             filters:
+              branches:
+                ignore:
+                  - /.*/
               tags:
                 only: /v[0-9]+(\.[0-9]+)*/
-              branches:
-                ignore:
-                  - /.*/
+            requires:
+              - pr-tools/pr-title-check
+              - build/test_lint
+              - build/test_unit
+              - build/test_coverage
+              - build/test_integration
+              - build/test_functional
+              - build/vulnerability_check
+              - build/audit_licenses
+              - build/license_scan
+              - build/image_scan
         - build/publish_npm_snapshot:
             context: org-global
-            requires:
-              - pr-tools/pr-title-check
-              - build/test_lint
-              - build/test_unit
-              - build/test_coverage
-              - build/test_integration
-              - build/test_functional
-              - build/vulnerability_check
-              - build/audit_licenses
-              - build/license_scan
-              - build/image_scan
             filters:
-              tags:
-                only: /v[0-9]+(\.[0-9]+)*\-snapshot+((\.[0-9]+)?)/
               branches:
                 ignore:
                   - /.*/
-        - build/publish_npm_prerelease:
-            context: org-global
+              tags:
+                only: /v[0-9]+(\.[0-9]+)*\-snapshot+((\.[0-9]+)?)/
             requires:
-              - pr-tools/pr-title-check
-              - build/test_lint
-              - build/test_unit
-              - build/test_coverage
-              - build/vulnerability_check
-              - build/audit_licenses
-            filters:
-              branches:
-                only:
-                  - /(major|minor|patch)/.*/
-        - build/publish_docker_prerelease:
-            context: org-global
-            requires:
-              - build/build_local
               - pr-tools/pr-title-check
               - build/test_lint
               - build/test_unit
@@ -274,7 +244,25 @@ usage:
               - build/audit_licenses
               - build/license_scan
               - build/image_scan
+        - build/publish_npm_prerelease:
+            context: org-global
             filters:
               branches:
                 only:
                   - /(major|minor|patch)/.*/
+            requires:
+              - build/test_lint
+              - build/test_unit
+              - build/test_integration
+              - build/test_functional
+        - build/publish_docker_prerelease:
+            context: org-global
+            filters:
+              branches:
+                only:
+                  - /(major|minor|patch)/.*/
+            requires:
+              - build/test_lint
+              - build/test_unit
+              - build/test_integration
+              - build/test_functional
