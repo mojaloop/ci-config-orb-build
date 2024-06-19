@@ -47,6 +47,7 @@ workflows:
           name: pack-dev
           filters: *dev-filters
       - orb-tools/publish:
+          name: publish-dev
           orb_name: mojaloop/build
           vcs_type: << pipeline.project.type >>
           pub_type: dev
