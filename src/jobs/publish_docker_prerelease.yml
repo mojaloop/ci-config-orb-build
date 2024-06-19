@@ -7,8 +7,10 @@ environment:
 steps:
   - attach_workspace:
       at: /tmp
-  - run: |
-      cat /tmp/prerelease.env >> $BASH_ENV
+  - run:
+      name: Read the prerelease variables
+      command: |
+        cat /tmp/prerelease.env >> $BASH_ENV
   - run:
       name: Setup Slack config
       command: |
