@@ -189,7 +189,7 @@ usage:
               branches:
                 ignore:
                   - /.*/
-        - build/publish_docker-snapshot:
+        - build/publish_docker_snapshot:
             context: org-global
             requires:
               - build/build_local
@@ -228,7 +228,7 @@ usage:
               branches:
                 ignore:
                   - /.*/
-        - build/publish_npm-snapshot:
+        - build/publish_npm_snapshot:
             context: org-global
             requires:
               - pr-tools/pr-title-check
@@ -247,7 +247,7 @@ usage:
               branches:
                 ignore:
                   - /.*/
-        - build/publish_prerelease:
+        - build/publish_npm_prerelease:
             context: org-global
             requires:
               - pr-tools/pr-title-check
@@ -256,6 +256,24 @@ usage:
               - build/test_coverage
               - build/vulnerability_check
               - build/audit_licenses
+            filters:
+              branches:
+                only:
+                  - /(major|minor|patch)/.*/
+        - build/publish_docker_prerelease:
+            context: org-global
+            requires:
+              - build/build_local
+              - pr-tools/pr-title-check
+              - build/test_lint
+              - build/test_unit
+              - build/test_coverage
+              - build/test_integration
+              - build/test_functional
+              - build/vulnerability_check
+              - build/audit_licenses
+              - build/license_scan
+              - build/image_scan
             filters:
               branches:
                 only:
