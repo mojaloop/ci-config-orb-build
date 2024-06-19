@@ -43,13 +43,13 @@ steps:
         echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
   - npm_auth
   - npm_publish
+  - persist_to_workspace:
+      root: /tmp
+      paths:
+        - prerelease.env
   - slack/notify:
       event: pass
       template: SLACK_TEMP_RELEASE_SUCCESS
   - slack/notify:
       event: fail
       template: SLACK_TEMP_RELEASE_FAILURE
-  - persist_to_workspace:
-      root: /tmp
-      paths:
-        - prerelease.env
