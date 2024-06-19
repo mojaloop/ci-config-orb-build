@@ -262,7 +262,4 @@ usage:
                 only:
                   - /(major|minor|patch)/.*/
             requires:
-              - build/test_lint
-              - build/test_unit
-              - build/test_integration
-              - build/test_functional
+              - build/publish_npm_prerelease
