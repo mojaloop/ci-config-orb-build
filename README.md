@@ -8,8 +8,9 @@ _**mojaloop/build is a CircleCI orb for node.js build jobs in Mojaloop CI/CD pip
 
 ## Usage
 
-To use the `mojaloop/build` orb in your CircleCI configuration, include the
-following in your `.circleci/config.yml`:
+To use the `mojaloop/build` orb in your CircleCI configuration, turn on
+`Enable dynamic config using setup workflows` in the `Advanced Settings` of your
+project settings CircleCI. Then include the following in your `.circleci/config.yml`:
 
 ```yaml
 version: 2.1
