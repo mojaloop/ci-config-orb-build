@@ -6,5 +6,5 @@ steps:
       command: |
         if jq -e '.private == true' package.json > /dev/null; then
           echo "Package is private, skipping job."
-          exit 0
+          circleci-agent step halt
         fi
