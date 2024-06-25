@@ -6,6 +6,7 @@ environment:
 steps:
   - docker_dependencies
   - checkout
+  - check_npm_private
   - restore_cache_command
   - run:
       name: Setup for SNAPSHOT release

@@ -34,7 +34,7 @@ workflows:
       - orb-tools/pack:
           filters: *release-filters
       - orb-tools/publish:
-          orb_name: mojaloop/build
+          orb_name: kalinkrustev/build
           vcs_type: << pipeline.project.type >>
           pub_type: production
           # Ensure this job requires all test jobs and the pack job.
@@ -48,7 +48,7 @@ workflows:
           filters: *dev-filters
       - orb-tools/publish:
           name: publish-dev
-          orb_name: mojaloop/build
+          orb_name: kalinkrustev/build
           vcs_type: << pipeline.project.type >>
           pub_type: dev
           # Ensure this job requires all test jobs and the pack job.

@@ -1,8 +1,8 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.15
+  build: kalinkrustev/build@1.0.16
 workflows:
-  build_and_test:
+  checks:
     jobs:
       - build/pr_title_check:
           name: PR title
@@ -11,6 +11,8 @@ workflows:
               ignore:
                 - main
                 - master
+  build_and_test:
+    jobs:
       - build/setup:
           name: Setup
           filters: &release-condition
