@@ -1,6 +1,6 @@
 description: >
   Runs build and test workflow
-executor: docker
+executor: cimg/base:stable
 steps:
   - run:
       name: Create workflow
