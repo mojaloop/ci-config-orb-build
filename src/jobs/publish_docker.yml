@@ -6,6 +6,7 @@ environment:
   MAIN_BRANCH_NAME: main
 steps:
   - checkout
+  - check_dockerfile
   - run:
       name: Setup for LATEST release
       command: |

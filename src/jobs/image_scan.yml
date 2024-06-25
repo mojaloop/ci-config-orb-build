@@ -9,6 +9,8 @@ environment:
   NVM_ARCH_UNOFFICIAL_OVERRIDE: x64-musl ## Ref: https://github.com/nvm-sh/nvm/issues/1102#issuecomment-550572252
 working_directory: /home/circleci/project
 steps:
+  - checkout
+  - check_dockerfile
   - setup_remote_docker
   - attach_workspace:
       at: /tmp

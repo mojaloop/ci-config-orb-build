@@ -1,0 +1,9 @@
+description: >
+  Check if a Dockerfile exists and exit the job if it does not.
+steps:
+  - run:
+      name: Check for Dockerfile
+      command: |
+        if [ ! -f Dockerfile ]; then
+          circleci-agent step halt
+        fi

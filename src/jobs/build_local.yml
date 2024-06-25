@@ -5,6 +5,7 @@ environment:
   MAIN_BRANCH_NAME: main
 steps:
   - checkout
+  - check_dockerfile
   - configure_nvmrc
   - display_versions
   - run:
