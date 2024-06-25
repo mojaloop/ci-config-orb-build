@@ -5,8 +5,8 @@ steps:
   - run:
       name: Create workflow
       environment:
-        SCRIPT: <<include(workflows/build-and-test.yml)>>
+        SCRIPT: <<include(workflows/build_and_test.yml)>>
       command: |
-        echo $SCRIPT > /tmp/build-and-test.yml
+        echo $SCRIPT > /tmp/build_and_test.yml
   - continuation/continue:
-      configuration_path: /tmp/build-and-test.yml
+      configuration_path: /tmp/build_and_test.yml
