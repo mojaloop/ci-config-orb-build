@@ -1,0 +1,12 @@
+description: >
+  Runs build and test workflow
+executor: docker
+steps:
+  - run:
+      name: Create workflow
+      environment:
+        SCRIPT: <<include(workflows/build-and-test.yml)>>
+      command: |
+        echo $SCRIPT > /tmp/build-and-test.yml
+  - continuation/continue:
+      configuration_path: /tmp/build-and-test.yml
