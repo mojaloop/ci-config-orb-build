@@ -1,6 +1,7 @@
 description: |
   This job publishes a pre-release to NPM.
 executor: machine
+shell: /bin/bash -eo pipefail
 environment:
   MAIN_BRANCH_NAME: main
 steps:
@@ -16,18 +17,19 @@ steps:
       name: Setup for pre-release
       command: |
         if [[ $CIRCLE_BRANCH =~ ^(major|minor|patch)/(.*)$ ]]; then
-          echo "export RELEASE_TAG=${BASH_REMATCH[1]}-${BASH_REMATCH[2]}" >> $BASH_ENV
+          echo "export RELEASE_TAG=${BASH_REMATCH[1]}-${BASH_REMATCH[2]}" > /tmp/prerelease.env
           echo "RELEASE_TAG=${BASH_REMATCH[1]}-${BASH_REMATCH[2]}"
           echo "Pre-releasing ${BASH_REMATCH[1]} version ${BASH_REMATCH[2]}"
           npx standard-version --prerelease "${BASH_REMATCH[2]}" --release-as "${BASH_REMATCH[1]}" --message "chore(release): [ci skip] %s" --skip.changelog --no-verify
 
           PACKAGE_VERSION=$(cat package-lock.json | jq -r .version)
-          echo "export PACKAGE_VERSION=${PACKAGE_VERSION}" >> $BASH_ENV
+          echo "export PACKAGE_VERSION=${PACKAGE_VERSION}" >> /tmp/prerelease.env
           echo "PACKAGE_VERSION=${PACKAGE_VERSION}"
         else
           echo "unsupported branch $CIRCLE_BRANCH for pre-release"
           exit 1
         fi
+        cat /tmp/prerelease.env >> $BASH_ENV
   - run:
       name: Push the pre-release
       command: git push --follow-tags origin ${CIRCLE_BRANCH}
@@ -36,12 +38,16 @@ steps:
       command: |
         echo "export SLACK_PROJECT_NAME=${CIRCLE_PROJECT_REPONAME}" >> $BASH_ENV
         echo "export SLACK_RELEASE_TYPE='NPM pre-release'" >> $BASH_ENV
-        echo "export SLACK_RELEASE_TAG=v${CIRCLE_TAG:1}" >> $BASH_ENV
-        echo "export SLACK_RELEASE_URL=https://www.npmjs.com/package/@mojaloop/${CIRCLE_PROJECT_REPONAME}/v/${CIRCLE_TAG:1}" >> $BASH_ENV
+        echo "export SLACK_RELEASE_TAG=${RELEASE_TAG}" >> $BASH_ENV
+        echo "export SLACK_RELEASE_URL=https://www.npmjs.com/package/@mojaloop/${CIRCLE_PROJECT_REPONAME}/v/${PACKAGE_VERSION}" >> $BASH_ENV
         echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
         echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
   - npm_auth
   - npm_publish
+  - persist_to_workspace:
+      root: /tmp
+      paths:
+        - prerelease.env
   - slack/notify:
       event: pass
       template: SLACK_TEMP_RELEASE_SUCCESS

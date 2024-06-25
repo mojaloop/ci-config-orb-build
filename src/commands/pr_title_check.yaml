@@ -1,0 +1,24 @@
+description: Check the title of a Github pull request
+parameters:
+  ci-config-branch:
+    type: string
+steps:
+  - run:
+      name: Install general dependencies
+      command: |
+        apk --no-cache add git ca-certificates curl openssh-client
+        apk add --no-cache -t build-dependencies make gcc g++ python3 libtool autoconf automake jq
+  # Orbs don't let you package anything more than basic shell scripts
+  # so we bootstrap this orb by checking out the code in the repo
+  # TODO: checkout based on deterministic git tag
+  - run:
+      name: checkout ci-config repo
+      command: |
+        git clone -b << parameters.ci-config-branch >> https://github.com/mojaloop/ci-config.git
+        cd ci-config/pr-tools && npm install
+  - run:
+      name: Check the PR title
+      command: |
+        echo "env CIRCLE_PULL_REQUESTS: ${CIRCLE_PULL_REQUESTS}"
+        echo "env CIRCLE_PULL_REQUEST: ${CIRCLE_PULL_REQUEST}"
+        cd ci-config/pr-tools && npm run pr-title

@@ -6,7 +6,8 @@ display:
   source_url: "https://github.com/mojaloop/ci-config-orb-build"
 
 orbs:
+  continuation: circleci/continuation@1.0.0
   anchore: anchore/anchore-engine@1.9.0
-  slack: circleci/slack@4.12.5
+  slack: circleci/slack@4.13.3
   pr-tools: mojaloop/pr-tools@0.1.10
   gh: circleci/github-cli@2.2.0

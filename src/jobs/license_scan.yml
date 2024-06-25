@@ -5,6 +5,8 @@ executor: machine
 environment:
   MAIN_BRANCH_NAME: main
 steps:
+  - checkout
+  - check_dockerfile
   - attach_workspace:
       at: /tmp
   - run:
