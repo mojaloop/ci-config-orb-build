@@ -9,7 +9,10 @@ steps:
       at: /tmp
   - run:
       name: Load the pre-built docker image from workspace
-      command: docker load -i /tmp/docker-image.tar
+      command: |
+        if [ -f /tmp/docker-image.tar ]; then
+          docker load -i /tmp/docker-image.tar
+        fi
   - run:
       name: Execute TTK functional tests
       command: npm run test:functional
