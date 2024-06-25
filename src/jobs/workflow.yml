@@ -1,6 +1,6 @@
 description: >
   Runs build and test workflow
-executor: cimg/base:stable
+executor: continuation/default
 steps:
   - run:
       name: Create workflow
