@@ -6,6 +6,9 @@ usage:
   orbs:
     build: <namespace>/<orb-name>@1.0.15
   workflows:
-    build_and_test:
+    setup:
       jobs:
-        - build/workflow
+        - build/workflow:
+            filters:
+              tags:
+                only: /v\d+(\.\d+){2}(-(snapshot|hotfix|perf)\.\d+)?/
