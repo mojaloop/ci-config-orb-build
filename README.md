@@ -6,6 +6,39 @@
 
 _**mojaloop/build is a CircleCI orb for node.js build jobs in Mojaloop CI/CD pipelines**_
 
+## Usage
+
+To use the `mojaloop/build` orb in your CircleCI configuration, turn on
+`Enable dynamic config using setup workflows` in the `Advanced Settings` of your
+project settings CircleCI. Then include the following in your `.circleci/config.yml`:
+
+```yaml
+version: 2.1
+setup: true
+orbs:
+  build: mojaloop/build@1.0.17
+workflows:
+  setup:
+    jobs:
+      - build/workflow:
+          filters:
+            tags:
+              only: /v\d+(\.\d+){2}(-(snapshot|hotfix|perf)\.\d+)?/
+
+```
+
+Conventions:
+
+- If a `Dockerfile` is present in the root of the repository, it will be used to
+  build and publish an image.
+- If a `package.json` is present in the root of the repository and it does not have
+  private=true, the package will be published to npm for
+  the applicable branches and tags.
+- Integration and functional tests will execute
+  `npm run test:integration` and `npm run test:functional` respectively.
+  If no such tests are needed
+  set these scripts for `'true'` in the `package.json` file.
+
 ---
 
 ## Resources

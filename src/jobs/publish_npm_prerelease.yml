@@ -30,9 +30,14 @@ steps:
           exit 1
         fi
         cat /tmp/prerelease.env >> $BASH_ENV
+  - persist_to_workspace:
+      root: /tmp
+      paths:
+        - prerelease.env
   - run:
       name: Push the pre-release
       command: git push --follow-tags origin ${CIRCLE_BRANCH}
+  - check_npm_private
   - run:
       name: Setup Slack config
       command: |
@@ -44,10 +49,6 @@ steps:
         echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
   - npm_auth
   - npm_publish
-  - persist_to_workspace:
-      root: /tmp
-      paths:
-        - prerelease.env
   - slack/notify:
       event: pass
       template: SLACK_TEMP_RELEASE_SUCCESS
