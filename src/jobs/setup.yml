@@ -3,13 +3,17 @@ description: >
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main
+parameters:
+  git_tag:
+    type: string
+    default: ''
 steps:
   - docker_dependencies
   - ghpr/build-prospective-branch:
       when:
         matches: &pre-release
           pattern: ^v\d+(\.\d+){2}-(minor|major|patch)\.\d+$
-          value: << pipeline.parameters.git_tag >>
+          value: << parameters.git_tag >>
   - checkout:
       when:
         not:
