@@ -5,7 +5,15 @@ environment:
   MAIN_BRANCH_NAME: main
 steps:
   - docker_dependencies
-  - checkout
+  - ghpr/build-prospective-branch:
+      when:
+        matches: &pre-release
+          pattern: ^v\d+(\.\d+){2}-(minor|major|patch)\.\d+$
+          value: << pipeline.git.tag >>
+  - checkout:
+      when:
+        not:
+          matches: *pre-release
   - configure_nvm
   - display_versions
   - run:
