@@ -14,14 +14,14 @@ steps:
         matches: &pre-release
           pattern: ^v\d+(\.\d+){2}-(minor|major|patch)\.\d+$
           value: << parameters.git_tag >>
-    steps:
-      - ghpr/build-prospective-branch
+      steps:
+        - ghpr/build-prospective-branch
   - when:
       condition:
         not:
           matches: *pre-release
-    steps:
-      - checkout
+      steps:
+        - checkout
   - configure_nvm
   - display_versions
   - run:
