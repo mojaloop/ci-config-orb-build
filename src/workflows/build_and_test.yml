@@ -1,6 +1,10 @@
 version: 2.1
 orbs:
   build: mojaloop/build@1.0.18
+parameters:
+  git_tag:
+    type: string
+    default: ''
 workflows:
   checks:
     jobs:
