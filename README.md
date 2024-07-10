@@ -21,6 +21,7 @@ workflows:
   setup:
     jobs:
       - build/workflow:
+          git_tag: << pipeline.git.tag >>
           filters:
             tags:
               only: /v\d+(\.\d+){2}(-(snapshot|hotfix|perf|minor|major|patch)\.\d+)?/

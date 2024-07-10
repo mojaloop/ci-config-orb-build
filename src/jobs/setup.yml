@@ -9,7 +9,7 @@ steps:
       when:
         matches: &pre-release
           pattern: ^v\d+(\.\d+){2}-(minor|major|patch)\.\d+$
-          value: << pipeline.git.tag >>
+          value: << pipeline.parameters.git_tag >>
   - checkout:
       when:
         not:

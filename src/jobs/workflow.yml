@@ -1,6 +1,10 @@
 description: >
   Runs build and test workflow
 executor: continuation/default
+parameters:
+  git_tag:
+    type: string
+    default: ''
 steps:
   - run:
       name: Create workflow
@@ -10,3 +14,5 @@ steps:
         echo "$SCRIPT" > /tmp/build_and_test.yml
   - continuation/continue:
       configuration_path: /tmp/build_and_test.yml
+      parameters:
+        git_tag: << parameters.git_tag >>
