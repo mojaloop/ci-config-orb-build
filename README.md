@@ -16,14 +16,15 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.0.17
+  build: mojaloop/build@1.0.18
 workflows:
   setup:
     jobs:
       - build/workflow:
+          git_tag: << pipeline.git.tag >>
           filters:
             tags:
-              only: /v\d+(\.\d+){2}(-(snapshot|hotfix|perf)\.\d+)?/
+              only: /v\d+(\.\d+){2}(-(snapshot|hotfix|perf|minor|major|patch)\.\d+)?/
 
 ```
 
