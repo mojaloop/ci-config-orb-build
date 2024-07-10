@@ -9,15 +9,19 @@ parameters:
     default: ''
 steps:
   - docker_dependencies
-  - ghpr/build-prospective-branch:
-      when:
+  - when:
+      condition:
         matches: &pre-release
           pattern: ^v\d+(\.\d+){2}-(minor|major|patch)\.\d+$
           value: << parameters.git_tag >>
-  - checkout:
-      when:
+    steps:
+      - ghpr/build-prospective-branch
+  - when:
+      condition:
         not:
           matches: *pre-release
+    steps:
+      - checkout
   - configure_nvm
   - display_versions
   - run:
