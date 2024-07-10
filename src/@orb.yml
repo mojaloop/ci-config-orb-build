@@ -5,6 +5,11 @@ display:
   home_url: "https://mojaloop.io"
   source_url: "https://github.com/mojaloop/ci-config-orb-build"
 
+parameters:
+  git_tag:
+    type: string
+    default: ''
+
 orbs:
   continuation: circleci/continuation@1.0.0
   anchore: anchore/anchore-engine@1.9.0
