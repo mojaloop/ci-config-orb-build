@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.20
+  build: mojaloop/build@1.0.21
 parameters:
   git_tag:
     type: string
@@ -10,7 +10,7 @@ parameters:
     default: ''
 workflows:
   checks:
-    when: << parameters.pull_request >>
+    when: << pipeline.parameters.pull_request >>
     jobs:
       - build/pr_title_check:
           name: PR title
