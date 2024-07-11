@@ -21,7 +21,6 @@ workflows:
   setup:
     jobs:
       - build/workflow:
-          git_tag: << pipeline.git.tag >>
           filters:
             tags:
               only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/
