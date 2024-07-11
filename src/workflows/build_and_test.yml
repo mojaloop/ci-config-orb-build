@@ -1,12 +1,16 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.18
+  build: mojaloop/build@19
 parameters:
   git_tag:
     type: string
     default: ''
+  pull_request:
+    type: string
+    default: ''
 workflows:
   checks:
+    when: << parameters.pull_request >>
     jobs:
       - build/pr_title_check:
           name: PR title
@@ -25,7 +29,7 @@ workflows:
                 - /feature*/
                 - /bugfix*/
             tags: &setup-tags
-              only: /v\d+(\.\d+){2}(-(snapshot|hotfix|perf|minor|major|patch)\.\d+)?/
+              only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/
       - build/test_dependencies:
           name: Dependencies
           filters:
