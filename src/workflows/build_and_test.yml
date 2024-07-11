@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.21
+  build: mojaloop/build@1.0.22
 parameters:
   git_tag:
     type: string
@@ -78,6 +78,7 @@ workflows:
             - Build
       - build/image_scan:
           name: Image scan
+          context: org-global
           <<: *scan
       - build/release:
           name: Release
