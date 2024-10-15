@@ -7,7 +7,7 @@ steps:
       name: Install general dependencies
       command: |
         apk --no-cache add git ca-certificates curl openssh-client
-        apk add --no-cache -t build-dependencies make gcc g++ python3 libtool autoconf automake jq
+        apk add --no-cache -t build-dependencies make gcc g++ python3 py3-setuptools libtool autoconf automake jq
   # Orbs don't let you package anything more than basic shell scripts
   # so we bootstrap this orb by checking out the code in the repo
   # TODO: checkout based on deterministic git tag
