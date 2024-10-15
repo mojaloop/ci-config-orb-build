@@ -55,8 +55,6 @@ steps:
           echo "Triggering downstream workflow for $REPO_NAME"
           GH_TOKEN=$(echo $repo | cut -d: -f2) gh workflow run docker-image.yaml --repo $REPO_NAME -f image=${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:v${PACKAGE_VERSION} -f tag=${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:$RELEASE_TAG
         done
-    when:
-      - ${{ secrets.$DOWNSTREAM_IMAGE }}
   - run:
       name: Update Slack config
       command: |
