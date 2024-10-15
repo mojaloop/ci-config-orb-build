@@ -51,12 +51,17 @@ steps:
   - npm_publish
   - run:
       name: Trigger downstream workflows
-      # DOWNSTREAM_PACKAGE contains newline separated list of downstream repository:token pairs
+      # DOWNSTREAM_PACKAGE_ variables contain downstream repository:token pairs
       command: |
-        for repo in $DOWNSTREAM_PACKAGE; do
-          REPO_NAME=$(echo $repo | cut -d: -f1)
-          echo "Triggering downstream workflow for $REPO_NAME"
-          GH_TOKEN=$(echo $repo | cut -d: -f2) gh workflow run npm-package.yaml --repo $REPO_NAME -f image=${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:v${PACKAGE_VERSION} -f tag=${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:$RELEASE_TAG
+        for var in $(compgen -A variable | grep "^DOWNSTREAM_PACKAGE_"); do
+            REPO_NAME=$(echo ${!var} | cut -d: -f1)
+            echo "Triggering downstream workflow for $REPO_NAME"
+            curl -L \
+                -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer $(echo ${!var} | cut -d: -f2)" \
+                https://api.github.com/repos/$REPO_NAME/actions/workflows/npm-package.yaml/dispatches \
+                -d '{"ref":"main","inputs":{"version":"${PACKAGE_VERSION}","tag":"${RELEASE_TAG}"}}'
         done
   - slack/notify:
       event: pass

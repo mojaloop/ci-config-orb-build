@@ -48,12 +48,17 @@ steps:
         echo "export IMAGE_DIGEST=${IMAGE_DIGEST}" >> $BASH_ENV
   - run:
       name: Trigger downstream workflows
-      # DOWNSTREAM_IMAGE contains newline separated list of downstream repository:token pairs
+      # DOWNSTREAM_IMAGE_ variables contain downstream repository:token pairs
       command: |
-        for repo in $DOWNSTREAM_IMAGE; do
-          REPO_NAME=$(echo $repo | cut -d: -f1)
-          echo "Triggering downstream workflow for $REPO_NAME"
-          GH_TOKEN=$(echo $repo | cut -d: -f2) gh workflow run docker-image.yaml --repo $REPO_NAME -f image=${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:v${PACKAGE_VERSION} -f tag=${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:$RELEASE_TAG
+        for var in $(compgen -A variable | grep "^DOWNSTREAM_IMAGE_"); do
+            REPO_NAME=$(echo ${!var} | cut -d: -f1)
+            echo "Triggering downstream workflow for $REPO_NAME"
+            curl -L \
+                -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer $(echo ${!var} | cut -d: -f2)" \
+                https://api.github.com/repos/$REPO_NAME/actions/workflows/docker-image.yaml/dispatches \
+                -d '{"ref":"main","inputs":{"image":"${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:v${PACKAGE_VERSION}","tag":"${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:$RELEASE_TAG"}}'
         done
   - run:
       name: Update Slack config
