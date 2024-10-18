@@ -58,7 +58,7 @@ steps:
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer $(echo ${!var} | cut -d: -f2)" \
                 https://api.github.com/repos/$REPO_NAME/actions/workflows/docker-image.yaml/dispatches \
-                -d '{"ref":"main","inputs":{"image":"${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:v${PACKAGE_VERSION}","tag":"${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:$RELEASE_TAG"}}'
+                -d '{"ref":"main","inputs":{"upstream":"'$CIRCLE_BUILD_URL'","image":"'${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:v${PACKAGE_VERSION}'","tag":"'$RELEASE_TAG'"}}'
         done
   - run:
       name: Update Slack config
