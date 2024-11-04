@@ -3,6 +3,10 @@ description: |
 executor: machine
 environment:
   MAIN_BRANCH_NAME: main
+parameters:
+  yarn_lock:
+    type: string
+    default: ''
 steps:
   - checkout
   - check_dockerfile

@@ -3,11 +3,16 @@ description: |
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main
+parameters:
+  yarn_lock:
+    type: string
+    default: ''
 steps:
   - docker_dependencies
   - license_scanner
   - checkout
-  - restore_cache_command
+  - restore_cache_command:
+      yarn_lock: << parameters.yarn_lock >>
   - run:
       name: Run the license-scanner
       command: cd /tmp/license-scanner && pathToRepo=$CIRCLE_WORKING_DIRECTORY make run

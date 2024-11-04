@@ -4,6 +4,10 @@ executor: machine
 shell: /bin/bash -eo pipefail
 environment:
   MAIN_BRANCH_NAME: main
+parameters:
+  yarn_lock:
+    type: string
+    default: ''
 steps:
   - run:
       name: Install git
@@ -11,7 +15,8 @@ steps:
         sudo apt-get update && sudo apt-get install -y git
   - gh/install
   - checkout
-  - restore_cache_command
+  - restore_cache_command:
+      yarn_lock: << parameters.yarn_lock >>
   - configure_git
   - run:
       name: Setup for pre-release

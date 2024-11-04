@@ -7,6 +7,9 @@ parameters:
   git_tag:
     type: string
     default: ''
+  yarn_lock:
+    type: string
+    default: ''
 steps:
   - docker_dependencies
   - when:
@@ -26,7 +29,7 @@ steps:
   - display_versions
   - when:
       condition:
-        not: << pipeline.parameters.yarn_lock >>
+        not: << parameters.yarn_lock >>
       steps:
         - run:
             name: NPM install
@@ -36,7 +39,7 @@ steps:
             paths:
               - node_modules
   - when:
-      condition: << pipeline.parameters.yarn_lock >>
+      condition: << parameters.yarn_lock >>
       steps:
         - run:
             name: Yarn install

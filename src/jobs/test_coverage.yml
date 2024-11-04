@@ -2,13 +2,18 @@ description: Run code coverage check
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main
+parameters:
+  yarn_lock:
+    type: string
+    default: ''
 steps:
   - docker_dependencies
   - aws_dependencies
   - checkout
   - configure_nvm
   - display_versions
-  - restore_cache_command
+  - restore_cache_command:
+      yarn_lock: << parameters.yarn_lock >>
   - run:
       name: Execute code coverage check
       command: npm -s run test:coverage-check

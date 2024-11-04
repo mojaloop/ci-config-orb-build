@@ -3,11 +3,16 @@ description: |
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main
+parameters:
+  yarn_lock:
+    type: string
+    default: ''
 steps:
   - docker_dependencies
   - checkout
   - check_npm_private
-  - restore_cache_command
+  - restore_cache_command:
+      yarn_lock: << parameters.yarn_lock >>
   - run:
       name: Setup for SNAPSHOT release
       command: |

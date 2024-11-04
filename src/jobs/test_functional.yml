@@ -3,6 +3,10 @@ description:
 executor: machine
 environment:
   ML_CORE_TEST_HARNESS_DIR: /tmp/ml-core-test-harness
+parameters:
+  yarn_lock:
+    type: string
+    default: ''
 steps:
   - checkout
   - attach_workspace:
