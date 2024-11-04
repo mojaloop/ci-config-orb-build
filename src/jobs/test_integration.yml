@@ -19,10 +19,16 @@ steps:
       command: |
         # Set Node version to default (Note: this is needed on Ubuntu)
         nvm use default
-        npm ci
 
         echo "Running integration tests...."
-        npm run test:integration
+        if [ -f yarn.lock ]; then
+          yarn install --immutable
+          yarn run build
+          yarn run test:integration
+        else
+          npm ci
+          npm run test:integration
+        fi
       environment:
         ENDPOINT_URL: http://localhost:4545/notification
         UV_THREADPOOL_SIZE: 12

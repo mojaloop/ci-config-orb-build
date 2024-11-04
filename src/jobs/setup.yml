@@ -24,10 +24,29 @@ steps:
         - checkout
   - configure_nvm
   - display_versions
-  - run:
-      name: Update NPM install
-      command: npm ci
-  - save_cache:
-      key: dependency-cache-{{ .Environment.CIRCLE_SHA1 }}
-      paths:
-        - node_modules
+  - when:
+      condition:
+        not: << pipeline.parameters.yarn_lock >>
+      steps:
+        - run:
+            name: NPM install
+            command: npm ci
+        - save_cache:
+            key: dependency-cache-{{ .Environment.CIRCLE_SHA1 }}
+            paths:
+              - node_modules
+  - when:
+      condition: << pipeline.parameters.yarn_lock >>
+      steps:
+        - run:
+            name: Yarn install
+            command: |
+              yarn install --immutable
+              yarn run build
+        - save_cache:
+            name: Save Yarn Package Cache
+            key: yarn-packages-{{ checksum "yarn.lock" }}
+            paths:
+              - .yarn
+              - .yarn/unplugged
+              - node_modules

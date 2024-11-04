@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.0.28
+  build: mojaloop/build@1.0.29
 workflows:
   setup:
     jobs:
@@ -34,10 +34,14 @@ Conventions:
 - If a `package.json` is present in the root of the repository and it does not have
   private=true, the package will be published to npm for
   the applicable branches and tags.
-- Integration and functional tests will execute
-  `npm run test:integration` and `npm run test:functional` respectively.
-  If no such tests are needed
-  set these scripts for `'true'` in the `package.json` file.
+- The following scripts are expected in the `package.json` file:
+  - `lint`
+  - `dep:check`
+  - `audit:check`
+  - `test:xunit`
+  - `test:integration`
+  - `test:functional`
+  - `test:coverage-check`
 
 ---
 

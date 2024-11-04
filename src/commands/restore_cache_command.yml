@@ -1,6 +1,15 @@
 description: >
   Restore the cache of dependencies.
 steps:
-  - restore_cache:
-      keys:
-        - dependency-cache-{{ .Environment.CIRCLE_SHA1 }}
+  - when:
+      condition:
+        not: << pipeline.parameters.yarn_lock >>
+      steps:
+        - restore_cache:
+            keys:
+              - dependency-cache-{{ .Environment.CIRCLE_SHA1 }}
+  - when:
+      condition: << pipeline.parameters.yarn_lock >>
+      steps:
+        - restore_cache:
+            key: yarn-packages-{{ checksum "yarn.lock" }}
