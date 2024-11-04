@@ -8,6 +8,9 @@ parameters:
   pull_request:
     type: string
     default: ''
+  yarn_lock:
+    type: string
+    default: ''
 workflows:
   checks:
     when: << pipeline.parameters.pull_request >>
