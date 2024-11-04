@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.31
+  build: mojaloop/build@1.0.32
 parameters:
   git_tag:
     type: string
@@ -26,8 +26,7 @@ workflows:
     jobs:
       - build/setup:
           name: Setup
-          parameters:
-            yarn_lock: << pipeline.parameters.yarn_lock >>
+          yarn_lock: << pipeline.parameters.yarn_lock >>
           filters: &setup-filter
             branches:
               ignore:
@@ -37,8 +36,7 @@ workflows:
               only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/
       - build/test_dependencies:
           name: Dependencies
-          parameters:
-            yarn_lock: << pipeline.parameters.yarn_lock >>
+          yarn_lock: << pipeline.parameters.yarn_lock >>
           filters:
             branches:
               ignore:
@@ -48,8 +46,7 @@ workflows:
             - Setup
       - build/test_lint: &test-condition
           name: Lint
-          parameters:
-            yarn_lock: << pipeline.parameters.yarn_lock >>
+          yarn_lock: << pipeline.parameters.yarn_lock >>
           filters: *setup-filter
           requires:
             - Setup
@@ -70,8 +67,7 @@ workflows:
           name: Build
       - build/test_integration: &test-docker
           name: Integration tests
-          parameters:
-            yarn_lock: << pipeline.parameters.yarn_lock >>
+          yarn_lock: << pipeline.parameters.yarn_lock >>
           filters: *setup-filter
           requires:
             - Build
@@ -93,8 +89,7 @@ workflows:
           <<: *scan
       - build/release:
           name: Release
-          parameters:
-            yarn_lock: << pipeline.parameters.yarn_lock >>
+          yarn_lock: << pipeline.parameters.yarn_lock >>
           context: org-global
           filters: &release
             branches:
@@ -130,8 +125,7 @@ workflows:
           requires: *tests
       - build/publish_npm:
           name: NPM release
-          parameters:
-            yarn_lock: << pipeline.parameters.yarn_lock >>
+          yarn_lock: << pipeline.parameters.yarn_lock >>
           <<: *publish-job
       - build/publish_docker_snapshot: &publish-snapshot-job
           name: Docker snapshot
@@ -145,13 +139,11 @@ workflows:
           requires: *tests
       - build/publish_npm_snapshot:
           name: NPM snapshot
-          parameters:
-            yarn_lock: << pipeline.parameters.yarn_lock >>
+          yarn_lock: << pipeline.parameters.yarn_lock >>
           <<: *publish-snapshot-job
       - build/publish_npm_prerelease:
           name: NPM prerelease
-          parameters:
-            yarn_lock: << pipeline.parameters.yarn_lock >>
+          yarn_lock: << pipeline.parameters.yarn_lock >>
           context: org-global
           filters: &only-prerelease-branches
             branches:
