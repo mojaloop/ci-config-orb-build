@@ -46,11 +46,11 @@ steps:
           nvm install $NVMRC_VERSION
           nvm alias default $NVMRC_VERSION
           nvm use $NVMRC_VERSION
+          cd $CIRCLE_WORKING_DIRECTORY
           if [ -f "yarn.lock" ]; then
             echo "==> Installing Yarn"
             npm install -g yarn
           fi
-          cd $CIRCLE_WORKING_DIRECTORY
         else
           echo "==> ERROR - NVMRC_VERSION has not been set! - NVMRC_VERSION: $NVMRC_VERSION"
           exit 1
