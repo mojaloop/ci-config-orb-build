@@ -13,7 +13,7 @@ steps:
         echo "export RELEASE_TAG=$RELEASE_TAG_PROD" >> $BASH_ENV
         echo "RELEASE_TAG=$RELEASE_TAG_PROD"
 
-        PACKAGE_VERSION=$(cat package-lock.json | jq -r .version)
+        PACKAGE_VERSION=$(cat package.json | jq -r .version)
         echo "export PACKAGE_VERSION=${PACKAGE_VERSION}" >> $BASH_ENV
         echo "PACKAGE_VERSION=${PACKAGE_VERSION}"
   - run:

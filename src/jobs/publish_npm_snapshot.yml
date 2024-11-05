@@ -20,7 +20,7 @@ steps:
         echo "RELEASE_TAG=${RELEASE_TAG_SNAPSHOT}"
         echo "Override package version: ${CIRCLE_TAG:1}"
         npx standard-version --skip.tag --skip.commit --skip.changelog --release-as ${CIRCLE_TAG:1}
-        PACKAGE_VERSION=$(cat package-lock.json | jq -r .version)
+        PACKAGE_VERSION=$(cat package.json | jq -r .version)
         echo "export PACKAGE_VERSION=${PACKAGE_VERSION}" >> $BASH_ENV
         echo "PACKAGE_VERSION=${PACKAGE_VERSION}"
   - run:
