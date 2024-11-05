@@ -2,5 +2,7 @@ description: |
   Ubuntu 22.04 machine executor.
 working_directory: /home/circleci/project
 shell: "/bin/bash -leo pipefail"
+environment:
+  BUILD_LIBRDKAFKA: 0
 machine:
   image: ubuntu-2204:2023.04.2 # Ref: https://circleci.com/developer/machine/image/ubuntu-2204
