@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.38
+  build: mojaloop/build@1.0.39
 parameters:
   git_tag:
     type: string
@@ -154,6 +154,8 @@ workflows:
             - Unit tests
             - Integration tests
             - Functional tests
+            - License audit
+            - License scan
       - build/publish_docker_prerelease:
           name: Docker prerelease
           context: org-global
