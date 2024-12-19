@@ -11,6 +11,9 @@ parameters:
   yarn_lock:
     type: string
     default: ''
+  base_image:
+    type: string
+    default: ''
 workflows:
   checks:
     when: << pipeline.parameters.pull_request >>
@@ -85,6 +88,7 @@ workflows:
             - Build
       - build/image_scan:
           name: Image scan
+          base_image: << pipeline.parameters.base_image >>
           context: org-global
           <<: *scan
       - build/release:
