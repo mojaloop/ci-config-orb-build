@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.0.42
+  build: mojaloop/build@1.0.44
 workflows:
   setup:
     jobs:
@@ -24,6 +24,8 @@ workflows:
           filters:
             tags:
               only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/
+          # optionally supply the base image for the image scan
+          # base_image: org/image
 
 ```
 
