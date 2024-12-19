@@ -7,6 +7,10 @@ environment:
   BASH_ENV: /etc/profile ## Ref: https://circleci.com/docs/env-vars/#alpine-linux
   ENV: ~/.profile
   NVM_ARCH_UNOFFICIAL_OVERRIDE: x64-musl ## Ref: https://github.com/nvm-sh/nvm/issues/1102#issuecomment-550572252
+parameters:
+  base_image:
+    type: string
+    default: ''
 working_directory: /home/circleci/project
 steps:
   - checkout
@@ -42,16 +46,24 @@ steps:
         # Generate the mojaloop anchore-policy
         cd /tmp/ci-config/container-scanning && ./mojaloop-policy-generator.js /tmp/mojaloop-policy.json
   - run:
+      name: Export base image variable
+      command: |
+        BASE_IMAGE=<< parameters.base_image >>
+        if [ -z "$BASE_IMAGE" ]; then
+          BASE_IMAGE=node:$NVMRC_VERSION-alpine3.19
+        fi
+        echo "export BASE_IMAGE=${BASE_IMAGE}" >> $BASH_ENV
+  - run:
       name: Pull base image locally
       command: |
-        echo "Pulling docker image: node:$NVMRC_VERSION-alpine3.19"
-        docker pull node:$NVMRC_VERSION-alpine3.19
+        echo "Pulling docker image: $BASE_IMAGE"
+        docker pull $BASE_IMAGE
   ## Analyze the base and derived image
   ## Note: It seems images are scanned in parallel, so preloading the base image result doesn't give us any real performance gain
   - anchore/analyze_local_image:
       # Force the older version, version 0.7.0 was just published, and is broken
-      anchore_version: v0.6.1
-      image_name: "docker.io/node:$NVMRC_VERSION-alpine3.19 ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local"
+      anchore_version: v0.10.2
+      image_name: "docker.io/$BASE_IMAGE ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local"
       policy_failure: false
       timeout: '500'
       # Note: if the generated policy is invalid, this will fallback to the default policy, which we don't want!
@@ -64,7 +76,7 @@ steps:
         aws s3 cp anchore-reports ${AWS_S3_DIR_ANCHORE_REPORTS}/latest/ --recursive
   - run:
       name: Evaluate failures
-      command: /tmp/ci-config/container-scanning/anchore-result-diff.js anchore-reports/node_${NVMRC_VERSION}-alpine3.19-policy.json anchore-reports/${CIRCLE_PROJECT_REPONAME}*-policy.json
+      command: /tmp/ci-config/container-scanning/anchore-result-diff.js anchore-reports/${BASE_IMAGE/:/_/}-policy.json anchore-reports/${CIRCLE_PROJECT_REPONAME}*-policy.json
   - store_artifacts:
       path: anchore-reports
   - slack/notify:
