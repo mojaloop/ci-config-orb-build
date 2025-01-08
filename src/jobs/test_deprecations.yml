@@ -1,5 +1,5 @@
 description: >
-  This job tests the project's deprecated dependencies
+  This job tests for deprecated dependencies, at any level
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main
