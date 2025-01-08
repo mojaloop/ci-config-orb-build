@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.0.44
+  build: mojaloop/build@1.0.45
 workflows:
   setup:
     jobs:
@@ -26,7 +26,6 @@ workflows:
               only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/
           # optionally supply the base image for the image scan
           # base_image: org/image
-
 ```
 
 Conventions:
@@ -65,23 +64,23 @@ against this repository!
 ### How to Publish An Update
 
 1. Merge pull requests with desired changes to the main branch.
-    - For the best experience, squash-and-merge and use [Conventional Commit Messages](https://conventionalcommits.org/).
+   - For the best experience, squash-and-merge and use [Conventional Commit Messages](https://conventionalcommits.org/).
 2. Find the current version of the orb.
-    - You can run `circleci orb info mojaloop/build | grep "Latest"` to see the
-      current version.
+   - You can run `circleci orb info mojaloop/build | grep "Latest"` to see the
+     current version.
 3. Create a [new Release](https://github.com/mojaloop/ci-config-orb-build/releases/new)
    on GitHub.
-    - Click "Choose a tag" and _create_ a new [semantically versioned](http://semver.org/)
-      tag. (ex: v1.0.0)
-    - We will have an opportunity to change this before we publish if needed
-        after the next step.
+   - Click "Choose a tag" and _create_ a new [semantically versioned](http://semver.org/)
+     tag. (ex: v1.0.0)
+   - We will have an opportunity to change this before we publish if needed
+     after the next step.
 4. Click _"+ Auto-generate release notes"_.
-    - This will create a summary of all of the merged pull requests since the
-      previous release.
-    - If you have used _[Conventional Commit Messages](https://conventionalcommits.org/)_
-      it will be easy to determine what types of changes were made, allowing you
-      to ensure the correct version tag is being published.
+   - This will create a summary of all of the merged pull requests since the
+     previous release.
+   - If you have used _[Conventional Commit Messages](https://conventionalcommits.org/)_
+     it will be easy to determine what types of changes were made, allowing you
+     to ensure the correct version tag is being published.
 5. Now ensure the version tag selected is semantically accurate based on the
    changes included.
 6. Click _"Publish Release"_.
-    - This will push a new tag and trigger your publishing pipeline on CircleCI.
+   - This will push a new tag and trigger your publishing pipeline on CircleCI.

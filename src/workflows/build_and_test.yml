@@ -1,19 +1,19 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.44
+  build: mojaloop/build@1.0.45
 parameters:
   git_tag:
     type: string
-    default: ''
+    default: ""
   pull_request:
     type: string
-    default: ''
+    default: ""
   yarn_lock:
     type: string
-    default: ''
+    default: ""
   base_image:
     type: string
-    default: ''
+    default: ""
 workflows:
   checks:
     when: << pipeline.parameters.pull_request >>
@@ -45,6 +45,12 @@ workflows:
               ignore:
                 - main
                 - master
+          requires:
+            - Setup
+      - build/test_deprecations:
+          name: Deprecations
+          yarn_lock: << pipeline.parameters.yarn_lock >>
+          filters: *setup-filter
           requires:
             - Setup
       - build/test_lint: &test-condition

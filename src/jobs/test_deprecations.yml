@@ -1,5 +1,5 @@
 description: >
-  This job tests the project's dependencies.
+  This job tests for deprecated dependencies, at any level
 executor: docker
 environment:
   MAIN_BRANCH_NAME: main
@@ -15,5 +15,5 @@ steps:
   - restore_cache_command:
       yarn_lock: << parameters.yarn_lock >>
   - run:
-      name: Execute dependency tests
-      command: npm run dep:check
+      name: Execute deprecations tests
+      command: npx @mojaloop/ml-depcheck-utility check-deprecations
