@@ -28,7 +28,7 @@ workflows:
           # base_image: org/image
 ```
 
-Conventions:
+### Conventions
 
 - If a `Dockerfile` is present in the root of the repository, it will be used to
   build and publish an image.
@@ -43,6 +43,16 @@ Conventions:
   - `test:integration`
   - `test:functional`
   - `test:coverage-check`
+
+### Publish conditions
+
+The orb will trigger a publish when one of the following conditions is met:
+
+- A release tag (e.g. `v#.#.#`) is pushed to the repository.
+- A snapshot tag (e.g. `v#.#.#-snapshot.#`, `v#.#.#-hotfix.#`, , `v#.#.#-perf.#`)
+  is pushed to the repository.
+- A commit to a pre-release branch (e.g. `major/*`, `minor/*`, `patch/*`) passed
+  the tests.
 
 ---
 
