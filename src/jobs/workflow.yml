@@ -12,8 +12,14 @@ steps:
         SCRIPT: <<include(workflows/build_and_test.yml)>>
       command: |
         echo "$SCRIPT" > /tmp/build_and_test.yml
-        YARN_LOCK=$(test -f yarn.lock && echo "true" || echo "")
-        echo '{"base_image":"<< parameters.base_image >>","git_tag":"'$CIRCLE_CI_TAG'","pull_request":"'$CIRCLE_PULL_REQUEST'","yarn_lock":"'$YARN_LOCK'"}' > /tmp/build_and_test_parameters.json
+        echo '{
+          "base_image":"<< parameters.base_image >>",
+          "git_tag":"'$CIRCLE_CI_TAG'",
+          "pull_request":"'$CIRCLE_PULL_REQUEST'",
+          "yarn_lock":"'$(test -f yarn.lock && echo "true" || echo "")'",
+          "slack":"'$(test -n "$SLACK_ACCESS_TOKEN" && echo "true" || echo "")'",
+          "aws":"'$(test -n "$AWS_SECRET_ACCESS_KEY" && echo "true" || echo "")'"
+        }' > /tmp/build_and_test_parameters.json
   - continuation/continue:
       configuration_path: /tmp/build_and_test.yml
       parameters: /tmp/build_and_test_parameters.json
