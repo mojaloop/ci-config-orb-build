@@ -4,6 +4,10 @@ executor: machine
 shell: "/bin/bash -eo pipefail"
 environment:
   MAIN_BRANCH_NAME: main
+parameters:
+  slack:
+    type: string
+    default: ''
 steps:
   - run:
       name: Install git
@@ -35,9 +39,7 @@ steps:
       name: Create Release
       command: |
         gh release create "v${RELEASE_TAG}" --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} --title "v${RELEASE_TAG} Release" --draft=false --notes "${RELEASE_CHANGES}" ./CHANGELOG.md
-  - slack/notify:
-      event: pass
-      template: SLACK_TEMP_RELEASE_SUCCESS
-  - slack/notify:
-      event: fail
-      template: SLACK_TEMP_RELEASE_FAILURE
+  - when:
+      condition: << parameters.slack >>
+      steps:
+        - slack_pass_fail

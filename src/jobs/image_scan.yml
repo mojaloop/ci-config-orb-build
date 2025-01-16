@@ -11,6 +11,12 @@ parameters:
   base_image:
     type: string
     default: ''
+  aws:
+    type: string
+    default: ''
+  slack:
+    type: string
+    default: ''
 working_directory: /home/circleci/project
 steps:
   - checkout
@@ -22,7 +28,10 @@ steps:
       name: Install docker dependencies for anchore
       command: |
         apk add --update py-pip docker python3-dev libffi-dev openssl-dev gcc libc-dev make jq curl bash
-  - aws_dependencies
+  - when:
+      condition: << parameters.aws >>
+      steps:
+        - aws_dependencies
   - checkout
   - run:
       name: Setup Slack config
@@ -68,17 +77,23 @@ steps:
       timeout: '500'
       # Note: if the generated policy is invalid, this will fallback to the default policy, which we don't want!
       policy_bundle_file_path: /tmp/mojaloop-policy.json
-  - run:
-      name: Upload Anchore reports to s3
-      command: |
-        aws s3 cp anchore-reports ${AWS_S3_DIR_ANCHORE_REPORTS}/${CIRCLE_PROJECT_REPONAME}/ --recursive
-        aws s3 rm ${AWS_S3_DIR_ANCHORE_REPORTS}/latest/ --recursive --exclude "*" --include "${CIRCLE_PROJECT_REPONAME}*"
-        aws s3 cp anchore-reports ${AWS_S3_DIR_ANCHORE_REPORTS}/latest/ --recursive
+  - when:
+      condition: << parameters.aws >>
+      steps:
+        - run:
+            name: Upload Anchore reports to s3
+            command: |
+              aws s3 cp anchore-reports ${AWS_S3_DIR_ANCHORE_REPORTS}/${CIRCLE_PROJECT_REPONAME}/ --recursive
+              aws s3 rm ${AWS_S3_DIR_ANCHORE_REPORTS}/latest/ --recursive --exclude "*" --include "${CIRCLE_PROJECT_REPONAME}*"
+              aws s3 cp anchore-reports ${AWS_S3_DIR_ANCHORE_REPORTS}/latest/ --recursive
   - run:
       name: Evaluate failures
       command: /tmp/ci-config/container-scanning/anchore-result-diff.js anchore-reports/$(basename ${BASE_IMAGE/:/_})-policy.json anchore-reports/${CIRCLE_PROJECT_REPONAME}*-policy.json
   - store_artifacts:
       path: anchore-reports
-  - slack/notify:
-      event: fail
-      template: SLACK_TEMP_RELEASE_FAILURE
+  - when:
+      condition: << parameters.slack >>
+      steps:
+        - slack/notify:
+            event: fail
+            template: SLACK_TEMP_RELEASE_FAILURE
