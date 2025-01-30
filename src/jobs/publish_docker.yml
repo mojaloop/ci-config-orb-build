@@ -55,6 +55,7 @@ steps:
         IMAGE_DIGEST=$(docker inspect ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:v${CIRCLE_TAG:1} | jq '.[0].RepoDigests | .[]')
         echo "IMAGE_DIGEST=${IMAGE_DIGEST}"
         echo "export IMAGE_DIGEST=${IMAGE_DIGEST}" >> $BASH_ENV
+  - trigger_downstream
   - run:
       name: Update Slack config
       command: |
