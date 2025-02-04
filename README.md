@@ -16,11 +16,12 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.0.49
+  build: mojaloop/build@1.0.50
 workflows:
   setup:
     jobs:
       - build/workflow:
+          context: org-global
           filters:
             tags:
               only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/

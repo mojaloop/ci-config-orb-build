@@ -6,6 +6,7 @@ parameters:
     default: ''
 executor: continuation/default
 steps:
+  - checkout
   - run:
       name: Create workflow
       environment:
