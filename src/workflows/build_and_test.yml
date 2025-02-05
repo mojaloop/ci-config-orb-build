@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.52
+  build: mojaloop/build@1.0.53
 parameters:
   git_tag:
     type: string
@@ -113,7 +113,6 @@ workflows:
             - Vulnerability check
             - License audit
             - License scan
-            - Image scan
       - build/github_release:
           name: GitHub release
           slack: << pipeline.parameters.slack >>
