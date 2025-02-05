@@ -93,13 +93,6 @@ workflows:
             tags: *setup-tags
           requires:
             - Build
-      - build/image_scan:
-          name: Image scan
-          base_image: << pipeline.parameters.base_image >>
-          aws: << pipeline.parameters.aws >>
-          slack: << pipeline.parameters.slack >>
-          context: org-global
-          <<: *scan
       - build/release:
           name: Release
           yarn_lock: << pipeline.parameters.yarn_lock >>
