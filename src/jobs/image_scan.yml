@@ -74,7 +74,7 @@ steps:
       anchore_version: v0.10.2
       image_name: "docker.io/$BASE_IMAGE ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local"
       policy_failure: false
-      timeout: 600
+      timeout: '600'
       # Note: if the generated policy is invalid, this will fallback to the default policy, which we don't want!
       policy_bundle_file_path: /tmp/mojaloop-policy.json
   - when:
