@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.53
+  build: mojaloop/build@1.0.54
 parameters:
   git_tag:
     type: string
@@ -93,6 +93,13 @@ workflows:
             tags: *setup-tags
           requires:
             - Build
+      - build/image_scan:
+          name: Image scan
+          base_image: << pipeline.parameters.base_image >>
+          aws: << pipeline.parameters.aws >>
+          slack: << pipeline.parameters.slack >>
+          context: org-global
+          <<: *scan
       - build/release:
           name: Release
           yarn_lock: << pipeline.parameters.yarn_lock >>
@@ -113,6 +120,7 @@ workflows:
             - Vulnerability check
             - License audit
             - License scan
+            - Image scan
       - build/github_release:
           name: GitHub release
           slack: << pipeline.parameters.slack >>
