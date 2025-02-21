@@ -4,6 +4,10 @@ executor: machine
 shell: "/bin/bash -eo pipefail"
 environment:
   MAIN_BRANCH_NAME: main
+parameters:
+  slack:
+    type: string
+    default: ''
 steps:
   - checkout
   - check_dockerfile
@@ -51,13 +55,12 @@ steps:
         IMAGE_DIGEST=$(docker inspect ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:v${CIRCLE_TAG:1} | jq '.[0].RepoDigests | .[]')
         echo "IMAGE_DIGEST=${IMAGE_DIGEST}"
         echo "export IMAGE_DIGEST=${IMAGE_DIGEST}" >> $BASH_ENV
+  - trigger_downstream
   - run:
       name: Update Slack config
       command: |
         echo "export SLACK_RELEASE_URL='https://hub.docker.com/layers/${CIRCLE_PROJECT_REPONAME}/${DOCKER_ORG}/${CIRCLE_PROJECT_REPONAME}/v${CIRCLE_TAG:1}/images/${IMAGE_DIGEST}?context=explore'" | sed -r "s/${DOCKER_ORG}\/${CIRCLE_PROJECT_REPONAME}@sha256:/sha256-/g" >> $BASH_ENV
-  - slack/notify:
-      event: pass
-      template: SLACK_TEMP_RELEASE_SUCCESS
-  - slack/notify:
-      event: fail
-      template: SLACK_TEMP_RELEASE_FAILURE
+  - when:
+      condition: << parameters.slack >>
+      steps:
+        - slack_pass_fail

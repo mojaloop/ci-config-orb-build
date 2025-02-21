@@ -1,0 +1,9 @@
+description: >
+  Send slack notifications.
+steps:
+  - slack/notify:
+      event: pass
+      template: SLACK_TEMP_RELEASE_SUCCESS
+  - slack/notify:
+      event: fail
+      template: SLACK_TEMP_RELEASE_FAILURE

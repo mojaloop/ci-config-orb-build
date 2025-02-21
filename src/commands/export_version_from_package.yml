@@ -1,9 +1,9 @@
 description: >
-  Export the version from the package.json file.
+  Format the changelog into the github release body and get release tag.
 steps:
   - run:
       name: Format the changelog into the github release body and get release tag
       command: |
-        git diff --no-indent-heuristic main~1 HEAD CHANGELOG.md | sed -n '/^+[^+]/ s/^+//p' > /tmp/changes
+        git diff --no-indent-heuristic ${CIRCLE_BRANCH}~1 HEAD CHANGELOG.md | sed -n '/^+[^+]/ s/^+//p' > /tmp/changes
         echo 'export RELEASE_CHANGES=`cat /tmp/changes`' >> $BASH_ENV
         echo 'export RELEASE_TAG=`cat package.json | jq -r .version`' >> $BASH_ENV

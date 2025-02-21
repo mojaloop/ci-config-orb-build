@@ -7,6 +7,9 @@ parameters:
   yarn_lock:
     type: string
     default: ''
+  slack:
+    type: string
+    default: ''
 steps:
   - docker_dependencies
   - checkout
@@ -32,9 +35,7 @@ steps:
         echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
   - npm_auth
   - npm_publish
-  - slack/notify:
-      event: pass
-      template: SLACK_TEMP_RELEASE_SUCCESS
-  - slack/notify:
-      event: fail
-      template: SLACK_TEMP_RELEASE_FAILURE
+  - when:
+      condition: << parameters.slack >>
+      steps:
+        - slack_pass_fail

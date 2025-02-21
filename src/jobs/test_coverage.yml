@@ -6,9 +6,15 @@ parameters:
   yarn_lock:
     type: string
     default: ''
+  aws:
+    type: string
+    default: ''
 steps:
   - docker_dependencies
-  - aws_dependencies
+  - when:
+      condition: << parameters.aws >>
+      steps:
+        - aws_dependencies
   - checkout
   - configure_nvm
   - display_versions

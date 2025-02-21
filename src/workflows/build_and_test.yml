@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.45
+  build: mojaloop/build@1.0.56
 parameters:
   git_tag:
     type: string
@@ -9,6 +9,12 @@ parameters:
     type: string
     default: ""
   yarn_lock:
+    type: string
+    default: ""
+  slack:
+    type: string
+    default: ""
+  aws:
     type: string
     default: ""
   base_image:
@@ -65,6 +71,7 @@ workflows:
       - build/test_coverage:
           <<: *test-condition
           name: Coverage
+          aws: << pipeline.parameters.aws >>
       - build/vulnerability_check:
           <<: *test-condition
           name: Vulnerability check
@@ -92,14 +99,10 @@ workflows:
             tags: *setup-tags
           requires:
             - Build
-      - build/image_scan:
-          name: Image scan
-          base_image: << pipeline.parameters.base_image >>
-          context: org-global
-          <<: *scan
       - build/release:
           name: Release
           yarn_lock: << pipeline.parameters.yarn_lock >>
+          slack: << pipeline.parameters.slack >>
           context: org-global
           filters: &release
             branches:
@@ -116,15 +119,16 @@ workflows:
             - Vulnerability check
             - License audit
             - License scan
-            - Image scan
       - build/github_release:
           name: GitHub release
+          slack: << pipeline.parameters.slack >>
           context: org-global
           filters: *release
           requires:
             - Release
       - build/publish_docker: &publish-job
           name: Docker release
+          slack: << pipeline.parameters.slack >>
           context: org-global
           filters:
             branches:
@@ -136,9 +140,11 @@ workflows:
       - build/publish_npm:
           name: NPM release
           yarn_lock: << pipeline.parameters.yarn_lock >>
+          slack: << pipeline.parameters.slack >>
           <<: *publish-job
       - build/publish_docker_snapshot: &publish-snapshot-job
           name: Docker snapshot
+          slack: << pipeline.parameters.slack >>
           context: org-global
           filters:
             branches:
@@ -150,10 +156,12 @@ workflows:
       - build/publish_npm_snapshot:
           name: NPM snapshot
           yarn_lock: << pipeline.parameters.yarn_lock >>
+          slack: << pipeline.parameters.slack >>
           <<: *publish-snapshot-job
       - build/publish_npm_prerelease:
           name: NPM prerelease
           yarn_lock: << pipeline.parameters.yarn_lock >>
+          slack: << pipeline.parameters.slack >>
           context: org-global
           filters: &only-prerelease-branches
             branches:
@@ -168,6 +176,7 @@ workflows:
             - License scan
       - build/publish_docker_prerelease:
           name: Docker prerelease
+          slack: << pipeline.parameters.slack >>
           context: org-global
           filters: *only-prerelease-branches
           requires:

@@ -16,11 +16,12 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.0.45
+  build: mojaloop/build@1.0.56
 workflows:
   setup:
     jobs:
       - build/workflow:
+          context: org-global
           filters:
             tags:
               only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/
@@ -28,7 +29,7 @@ workflows:
           # base_image: org/image
 ```
 
-Conventions:
+### Conventions
 
 - If a `Dockerfile` is present in the root of the repository, it will be used to
   build and publish an image.
@@ -43,6 +44,16 @@ Conventions:
   - `test:integration`
   - `test:functional`
   - `test:coverage-check`
+
+### Publish conditions
+
+The orb will trigger a publish when one of the following conditions is met:
+
+- A release tag (e.g. `v#.#.#`) is pushed to the repository.
+- A snapshot tag (e.g. `v#.#.#-snapshot.#`, `v#.#.#-hotfix.#`, , `v#.#.#-perf.#`)
+  is pushed to the repository.
+- A commit to a pre-release branch (e.g. `major/*`, `minor/*`, `patch/*`) passed
+  the tests.
 
 ---
 

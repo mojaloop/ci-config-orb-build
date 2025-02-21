@@ -7,6 +7,9 @@ parameters:
   yarn_lock:
     type: string
     default: ''
+  slack:
+    type: string
+    default: ''
 steps:
   - docker_dependencies
   - checkout
@@ -27,6 +30,9 @@ steps:
   - run:
       name: Push the release
       command: git push --follow-tags origin ${CIRCLE_BRANCH}
-  - slack/notify:
-      event: fail
-      template: SLACK_TEMP_RELEASE_FAILURE
+  - when:
+      condition: << parameters.slack >>
+      steps:
+        - slack/notify:
+            event: fail
+            template: SLACK_TEMP_RELEASE_FAILURE
