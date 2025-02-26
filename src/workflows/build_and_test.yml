@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.55
+  build: mojaloop/build@1.0.56
 parameters:
   git_tag:
     type: string
@@ -51,6 +51,12 @@ workflows:
               ignore:
                 - main
                 - master
+          requires:
+            - Setup
+      - build/test_deprecations:
+          name: Deprecations
+          yarn_lock: << pipeline.parameters.yarn_lock >>
+          filters: *setup-filter
           requires:
             - Setup
       - build/test_lint: &test-condition
