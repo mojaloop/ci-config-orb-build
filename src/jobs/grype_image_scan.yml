@@ -1,0 +1,77 @@
+description: |
+  This job scans the Docker image for vulnerabilities using Grype.
+executor: default-machine
+environment:
+  MAIN_BRANCH_NAME: main
+  BASH_ENV: /etc/profile ## Ref: https://circleci.com/docs/env-vars/#alpine-linux
+  ENV: ~/.profile
+  NVM_ARCH_UNOFFICIAL_OVERRIDE: x64-musl ## Ref: https://github.com/nvm-sh/nvm/issues/1102#issuecomment-550572252
+steps:
+  - checkout
+  - attach_workspace:
+      at: /tmp
+  - run:
+      name: Check for Grype config
+      command: |
+        if [ ! -f .grype.yaml ]; then
+          echo "Error: .grype.yaml configuration file not found in repository at root level."
+          echo "Please add a .grype.yaml file with appropriate vulnerability ignore rules."
+          exit 1
+        fi
+  - run:
+      name: Check dependencies
+      command: |
+        if ! command -v jq &> /dev/null; then
+          echo "jq could not be found, installing..."
+          sudo apt-get update && sudo apt-get install -y jq
+        fi
+  - run:
+      name: Load the pre-built docker image from workspace
+      command: docker load -i /tmp/docker-image.tar
+  - run:
+      name: Install Grype
+      command: |
+        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
+  - run:
+      name: Run Grype scan with custom config
+      command: |
+        IMAGE_NAME="${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local"
+        echo "Scanning image: $IMAGE_NAME"
+        # Use the config file in your repo
+        grype $IMAGE_NAME -c .grype.yaml -o table > grype-results.txt
+        grype $IMAGE_NAME -c .grype.yaml -o json > grype-results.json
+        cat grype-results.txt
+        cat grype-results.json
+  - run:
+      name: Check for critical, high and medium vulnerabilities
+      command: |
+        # Count vulnerabilities in the filtered results
+        CRITICAL_COUNT=$(cat grype-results.json | jq '[.matches[] | select(.vulnerability.severity == "Critical")] | length')
+        HIGH_COUNT=$(cat grype-results.json | jq '[.matches[] | select(.vulnerability.severity == "High")] | length')
+        MEDIUM_COUNT=$(cat grype-results.json | jq '[.matches[] | select(.vulnerability.severity == "Medium")] | length')
+        
+        echo "Critical vulnerabilities found: $CRITICAL_COUNT"
+        echo "High vulnerabilities found: $HIGH_COUNT"
+        echo "Medium vulnerabilities found: $MEDIUM_COUNT"
+        
+        # List remaining critical, high and medium vulnerabilities for awareness
+        echo "Critical severity vulnerabilities:"
+        cat grype-results.json | jq -r '.matches[] | select(.vulnerability.severity == "Critical") | "- \(.artifact.name) \(.artifact.version): \(.vulnerability.id)"'
+        
+        echo "High severity vulnerabilities:"
+        cat grype-results.json | jq -r '.matches[] | select(.vulnerability.severity == "High") | "- \(.artifact.name) \(.artifact.version): \(.vulnerability.id)"'
+        
+        echo "Medium severity vulnerabilities:"
+        cat grype-results.json | jq -r '.matches[] | select(.vulnerability.severity == "Medium") | "- \(.artifact.name) \(.artifact.version): \(.vulnerability.id)"'
+        
+        # Fail if any critical, high, or medium vulnerabilities are found
+        if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$HIGH_COUNT" -gt 0 ] || [ "$MEDIUM_COUNT" -gt 0 ]; then
+          echo "Critical, High, or Medium vulnerabilities found. Failing the build."
+          exit 1
+        fi
+  - store_artifacts:
+      path: grype-results.json
+      destination: grype-scan/scan-results.json
+  - store_artifacts:
+      path: grype-results.txt
+      destination: grype-scan/scan-results.txt

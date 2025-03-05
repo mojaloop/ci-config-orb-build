@@ -99,6 +99,15 @@ workflows:
             tags: *setup-tags
           requires:
             - Build
+      - build/grype_image_scan: &grype_image_scan
+          name: Grype image scan
+          filters:
+            branches:
+              ignore:
+                - /.*/
+            tags: *setup-tags
+          requires:
+            - Build
       - build/release:
           name: Release
           yarn_lock: << pipeline.parameters.yarn_lock >>
@@ -119,6 +128,7 @@ workflows:
             - Vulnerability check
             - License audit
             - License scan
+            - Grype image scan
       - build/github_release:
           name: GitHub release
           slack: << pipeline.parameters.slack >>
@@ -174,6 +184,7 @@ workflows:
             - Functional tests
             - License audit
             - License scan
+            - Grype image scan
       - build/publish_docker_prerelease:
           name: Docker prerelease
           slack: << pipeline.parameters.slack >>

@@ -29,6 +29,32 @@ workflows:
           # base_image: org/image
 ```
 
+###  Vulnerability Image Scan Configuration
+
+The repo using the orb, must declare a .grype.yaml file in the root of the repo. 
+As necessary vulnerabilities can be ignored per following example:
+
+```yaml
+ignore:
+  # Ignore cross-spawn vulnerabilities by CVE ID due to false positive
+  # as grype looks at package-lock.json where it shows versions with
+  # vulnerabilities, npm ls shows only 7.0.6 verion is used
+  - vulnerability: "GHSA-3xgq-45jj-v275"
+    package:
+      name: "cross-spawn"
+
+# Set output format defaults
+output:
+  - "table"
+  - "json"
+
+# Modify your CircleCI job to check critical count
+search:
+  scope: "squashed"
+quiet: false
+check-for-app-update: false
+```
+
 ### Conventions
 
 - If a `Dockerfile` is present in the root of the repository, it will be used to

@@ -5,4 +5,4 @@ shell: "/bin/bash -leo pipefail"
 environment:
   BUILD_LIBRDKAFKA: 0
 machine:
-  image: ubuntu-2204:2023.04.2 # Ref: https://circleci.com/developer/machine/image/ubuntu-2204
+  image: ubuntu-2404:2024.11.1 # Ref: https://circleci.com/developer/machine/image/ubuntu-2204
