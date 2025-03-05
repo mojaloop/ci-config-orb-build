@@ -103,8 +103,7 @@ workflows:
           name: Grype image scan
           filters:
             branches:
-              ignore:
-                - /.*/
+              only: /.*/
             tags: *setup-tags
           requires:
             - Build
