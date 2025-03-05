@@ -1,6 +1,6 @@
 description: |
   This job scans the Docker image for vulnerabilities using Grype.
-executor: default-machine
+executor: machine
 environment:
   MAIN_BRANCH_NAME: main
   BASH_ENV: /etc/profile ## Ref: https://circleci.com/docs/env-vars/#alpine-linux
@@ -49,21 +49,21 @@ steps:
         CRITICAL_COUNT=$(cat grype-results.json | jq '[.matches[] | select(.vulnerability.severity == "Critical")] | length')
         HIGH_COUNT=$(cat grype-results.json | jq '[.matches[] | select(.vulnerability.severity == "High")] | length')
         MEDIUM_COUNT=$(cat grype-results.json | jq '[.matches[] | select(.vulnerability.severity == "Medium")] | length')
-        
+
         echo "Critical vulnerabilities found: $CRITICAL_COUNT"
         echo "High vulnerabilities found: $HIGH_COUNT"
         echo "Medium vulnerabilities found: $MEDIUM_COUNT"
-        
+
         # List remaining critical, high and medium vulnerabilities for awareness
         echo "Critical severity vulnerabilities:"
         cat grype-results.json | jq -r '.matches[] | select(.vulnerability.severity == "Critical") | "- \(.artifact.name) \(.artifact.version): \(.vulnerability.id)"'
-        
+
         echo "High severity vulnerabilities:"
         cat grype-results.json | jq -r '.matches[] | select(.vulnerability.severity == "High") | "- \(.artifact.name) \(.artifact.version): \(.vulnerability.id)"'
-        
+
         echo "Medium severity vulnerabilities:"
         cat grype-results.json | jq -r '.matches[] | select(.vulnerability.severity == "Medium") | "- \(.artifact.name) \(.artifact.version): \(.vulnerability.id)"'
-        
+
         # Fail if any critical, high, or medium vulnerabilities are found
         if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$HIGH_COUNT" -gt 0 ] || [ "$MEDIUM_COUNT" -gt 0 ]; then
           echo "Critical, High, or Medium vulnerabilities found. Failing the build."
