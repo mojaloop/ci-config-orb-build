@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.0.56
+  build: mojaloop/build@1.0.57
 workflows:
   setup:
     jobs:
@@ -27,6 +27,32 @@ workflows:
               only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/
           # optionally supply the base image for the image scan
           # base_image: org/image
+```
+
+###  Vulnerability Image Scan Configuration
+
+The repo using the orb, must declare a .grype.yaml file in the root of the repo. 
+As necessary vulnerabilities can be ignored per following example:
+
+```yaml
+ignore:
+  # Ignore cross-spawn vulnerabilities by CVE ID due to false positive
+  # as grype looks at package-lock.json where it shows versions with
+  # vulnerabilities, npm ls shows only 7.0.6 verion is used
+  - vulnerability: "GHSA-3xgq-45jj-v275"
+    package:
+      name: "cross-spawn"
+
+# Set output format defaults
+output:
+  - "table"
+  - "json"
+
+# Modify your CircleCI job to check critical count
+search:
+  scope: "squashed"
+quiet: false
+check-for-app-update: false
 ```
 
 ### Conventions
