@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.56
+  build: mojaloop/build@1.0.57
 parameters:
   git_tag:
     type: string
