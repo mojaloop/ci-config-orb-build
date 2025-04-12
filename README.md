@@ -35,6 +35,9 @@ The repo using the orb, must declare a .grype.yaml file in the root of the repo.
 As necessary vulnerabilities can be ignored per following example:
 
 ```yaml
+# Set to true to disable the Grype image scan completely
+disabled: false
+
 ignore:
   # Ignore cross-spawn vulnerabilities by CVE ID due to false positive
   # as grype looks at package-lock.json where it shows versions with
@@ -54,6 +57,8 @@ search:
 quiet: false
 check-for-app-update: false
 ```
+
+To completely disable the Grype image scan, set `disabled: true` in your `.grype.yaml` file. This will cause the scan job to exit successfully without performing any checks.
 
 ### Conventions
 
