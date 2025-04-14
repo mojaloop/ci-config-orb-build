@@ -18,6 +18,12 @@ steps:
           echo "Please add a .grype.yaml file with appropriate vulnerability ignore rules."
           exit 1
         fi
+
+        # Check if scan is disabled
+        if grep -q "disabled: true" .grype.yaml; then
+          echo "Grype image scan is disabled in .grype.yaml"
+          exit 0
+        fi
   - run:
       name: Check dependencies
       command: |
