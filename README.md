@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.0.58
+  build: mojaloop/build@1.0.59
 workflows:
   setup:
     jobs:
@@ -29,9 +29,9 @@ workflows:
           # base_image: org/image
 ```
 
-###  Vulnerability Image Scan Configuration
+### Vulnerability Image Scan Configuration
 
-The repo using the orb, must declare a .grype.yaml file in the root of the repo. 
+The repo using the orb, must declare a .grype.yaml file in the root of the repo.
 As necessary vulnerabilities can be ignored per following example:
 
 ```yaml
