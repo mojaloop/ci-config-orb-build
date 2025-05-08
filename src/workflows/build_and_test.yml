@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.59
+  build: mojaloop/build@1.0.60
 parameters:
   git_tag:
     type: string
@@ -81,6 +81,7 @@ workflows:
       - build/build_local:
           <<: *test-condition
           name: Build
+          context: org-global
       - build/test_integration: &test-docker
           name: Integration tests
           yarn_lock: << pipeline.parameters.yarn_lock >>
@@ -92,6 +93,7 @@ workflows:
           <<: *test-docker
       - build/license_scan: &scan
           name: License scan
+          context: org-global
           filters:
             branches:
               ignore:
@@ -101,6 +103,7 @@ workflows:
             - Build
       - build/grype_image_scan: &grype_image_scan
           name: Grype image scan
+          context: org-global
           filters:
             branches:
               only: /.*/
