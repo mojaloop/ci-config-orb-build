@@ -36,8 +36,7 @@ steps:
 
         # Load and scan the image
         docker load -i /tmp/docker-image.tar
-        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
-        
+        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin        
         IMAGE_NAME="${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local"
         echo "Scanning image: $IMAGE_NAME"
         grype $IMAGE_NAME -c .grype.yaml -o table > grype-results.txt
