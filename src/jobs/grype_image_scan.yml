@@ -11,7 +11,7 @@ steps:
   - attach_workspace:
       at: /tmp
   - run:
-      name: Check for Grype config
+      name: Check Grype config and run scan if enabled
       command: |
         if [ ! -f .grype.yaml ]; then
           echo "Error: .grype.yaml configuration file not found in repository at root level."
@@ -22,36 +22,29 @@ steps:
         # Check if scan is disabled
         if grep -q "disabled: true" .grype.yaml; then
           echo "Grype image scan is disabled in .grype.yaml"
+          # Create empty result files to satisfy job requirements
+          echo "{}" > grype-results.json
+          echo "Scan disabled" > grype-results.txt
           exit 0
         fi
-  - run:
-      name: Check dependencies
-      command: |
+
+        # If we get here, scan is enabled - proceed with scan
         if ! command -v jq &> /dev/null; then
           echo "jq could not be found, installing..."
           sudo apt-get update && sudo apt-get install -y jq
         fi
-  - run:
-      name: Load the pre-built docker image from workspace
-      command: docker load -i /tmp/docker-image.tar
-  - run:
-      name: Install Grype
-      command: |
+
+        # Load and scan the image
+        docker load -i /tmp/docker-image.tar
         curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
-  - run:
-      name: Run Grype scan with custom config
-      command: |
         IMAGE_NAME="${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local"
         echo "Scanning image: $IMAGE_NAME"
-        # Use the config file in your repo
         grype $IMAGE_NAME -c .grype.yaml -o table > grype-results.txt
         grype $IMAGE_NAME -c .grype.yaml -o json > grype-results.json
         cat grype-results.txt
         cat grype-results.json
-  - run:
-      name: Check for critical, high and medium vulnerabilities
-      command: |
-        # Count vulnerabilities in the filtered results
+
+        # Check for vulnerabilities
         CRITICAL_COUNT=$(cat grype-results.json | jq '[.matches[] | select(.vulnerability.severity == "Critical")] | length')
         HIGH_COUNT=$(cat grype-results.json | jq '[.matches[] | select(.vulnerability.severity == "High")] | length')
         MEDIUM_COUNT=$(cat grype-results.json | jq '[.matches[] | select(.vulnerability.severity == "Medium")] | length')
