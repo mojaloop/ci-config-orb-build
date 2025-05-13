@@ -23,6 +23,7 @@ steps:
         if grep -q "disabled: true" .grype.yaml; then
           echo "Grype image scan is disabled in .grype.yaml"
           circleci-agent step halt
+          echo "This should not be printed"
         fi
   - run:
       name: Check dependencies
