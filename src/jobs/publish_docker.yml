@@ -1,6 +1,8 @@
 description: |
   This job publishes the Docker image built in the previous job to Docker Hub.
-executor: machine
+executor:
+  name: machine
+  resource_class: << parameters.resource_class >>
 shell: "/bin/bash -eo pipefail"
 environment:
   MAIN_BRANCH_NAME: main
@@ -8,6 +10,10 @@ parameters:
   slack:
     type: string
     default: ''
+  resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
 steps:
   - checkout
   - check_dockerfile

@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.0.63
+  build: mojaloop/build@1.0.64
 parameters:
   git_tag:
     type: string
@@ -17,15 +17,101 @@ parameters:
   aws:
     type: string
     default: ""
-  base_image:
-    type: string
-    default: ""
+  pr_title_check_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  setup_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_dependencies_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_deprecations_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_lint_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_unit_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_coverage_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  vulnerability_check_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  license_audit_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  build_local_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_integration_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_functional_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  license_scan_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  grype_image_scan_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  release_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  github_release_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_docker_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_npm_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_docker_snapshot_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_npm_snapshot_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_npm_prerelease_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_docker_prerelease_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
 workflows:
   checks:
     when: << pipeline.parameters.pull_request >>
     jobs:
       - build/pr_title_check:
           name: PR title
+          resource_class: << pipeline.parameters.pr_title_check_resource_class >>
           filters:
             branches:
               ignore:
@@ -35,6 +121,7 @@ workflows:
     jobs:
       - build/setup:
           name: Setup
+          resource_class: << pipeline.parameters.setup_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           filters: &setup-filter
             branches:
@@ -45,6 +132,7 @@ workflows:
               only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/
       - build/test_dependencies:
           name: Dependencies
+          resource_class: << pipeline.parameters.test_dependencies_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           filters:
             branches:
@@ -55,12 +143,14 @@ workflows:
             - Setup
       - build/test_deprecations:
           name: Deprecations
+          resource_class: << pipeline.parameters.test_deprecations_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           filters: *setup-filter
           requires:
             - Setup
       - build/test_lint: &test-condition
           name: Lint
+          resource_class: << pipeline.parameters.test_lint_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           filters: *setup-filter
           requires:
@@ -68,31 +158,39 @@ workflows:
       - build/test_unit:
           <<: *test-condition
           name: Unit tests
+          resource_class: << pipeline.parameters.test_unit_resource_class >>
       - build/test_coverage:
           <<: *test-condition
           name: Coverage
           aws: << pipeline.parameters.aws >>
+          resource_class: << pipeline.parameters.test_coverage_resource_class >>
       - build/vulnerability_check:
           <<: *test-condition
           name: Vulnerability check
+          resource_class: << pipeline.parameters.vulnerability_check_resource_class >>
       - build/audit_licenses:
           <<: *test-condition
           name: License audit
+          resource_class: << pipeline.parameters.license_audit_resource_class >>
       - build/build_local:
           <<: *test-condition
           name: Build
+          resource_class: << pipeline.parameters.build_local_resource_class >>
           context: org-global
       - build/test_integration: &test-docker
           name: Integration tests
+          resource_class: << pipeline.parameters.test_integration_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           filters: *setup-filter
           requires:
             - Build
       - build/test_functional:
-          name: Functional tests
           <<: *test-docker
+          name: Functional tests
+          resource_class: << pipeline.parameters.test_functional_resource_class >>
       - build/license_scan: &scan
           name: License scan
+          resource_class: << pipeline.parameters.license_scan_resource_class >>
           context: org-global
           filters:
             branches:
@@ -103,6 +201,7 @@ workflows:
             - Build
       - build/grype_image_scan: &grype_image_scan
           name: Grype image scan
+          resource_class: << pipeline.parameters.grype_image_scan_resource_class >>
           context: org-global
           filters:
             branches:
@@ -112,6 +211,7 @@ workflows:
             - Build
       - build/release:
           name: Release
+          resource_class: << pipeline.parameters.release_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           slack: << pipeline.parameters.slack >>
           context: org-global
@@ -133,6 +233,7 @@ workflows:
             - Grype image scan
       - build/github_release:
           name: GitHub release
+          resource_class: << pipeline.parameters.github_release_resource_class >>
           slack: << pipeline.parameters.slack >>
           context: org-global
           filters: *release
@@ -140,6 +241,7 @@ workflows:
             - Release
       - build/publish_docker: &publish-job
           name: Docker release
+          resource_class: << pipeline.parameters.publish_docker_resource_class >>
           slack: << pipeline.parameters.slack >>
           context: org-global
           filters:
@@ -150,12 +252,14 @@ workflows:
               only: /v\d+(\.\d+){2}/
           requires: *tests
       - build/publish_npm:
+          <<: *publish-job
           name: NPM release
+          resource_class: << pipeline.parameters.publish_npm_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           slack: << pipeline.parameters.slack >>
-          <<: *publish-job
       - build/publish_docker_snapshot: &publish-snapshot-job
           name: Docker snapshot
+          resource_class: << pipeline.parameters.publish_docker_snapshot_resource_class >>
           slack: << pipeline.parameters.slack >>
           context: org-global
           filters:
@@ -166,12 +270,14 @@ workflows:
               only: /v\d+(\.\d+){2}-(snapshot|hotfix|perf)\.\d+/
           requires: *tests
       - build/publish_npm_snapshot:
+          <<: *publish-snapshot-job
           name: NPM snapshot
+          resource_class: << pipeline.parameters.publish_npm_snapshot_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           slack: << pipeline.parameters.slack >>
-          <<: *publish-snapshot-job
       - build/publish_npm_prerelease:
           name: NPM prerelease
+          resource_class: << pipeline.parameters.publish_npm_prerelease_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           slack: << pipeline.parameters.slack >>
           context: org-global
@@ -189,6 +295,7 @@ workflows:
             - Grype image scan
       - build/publish_docker_prerelease:
           name: Docker prerelease
+          resource_class: << pipeline.parameters.publish_docker_prerelease_resource_class >>
           slack: << pipeline.parameters.slack >>
           context: org-global
           filters: *only-prerelease-branches

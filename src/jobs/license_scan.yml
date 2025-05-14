@@ -1,7 +1,14 @@
 description: |
   This job is responsible for scanning the licenses of the docker image
   built in the previous job.
-executor: machine
+executor:
+  name: machine
+  resource_class: << parameters.resource_class >>
+parameters:
+  resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
 environment:
   MAIN_BRANCH_NAME: main
 steps:

@@ -1,12 +1,18 @@
 description: |
   This job runs the license-scanner to check the licenses of the dependencies.
-executor: docker
+executor:
+  name: docker
+  resource_class: << parameters.resource_class >>
 environment:
   MAIN_BRANCH_NAME: main
 parameters:
   yarn_lock:
     type: string
     default: ''
+  resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
 steps:
   - docker_dependencies
   - license_scanner

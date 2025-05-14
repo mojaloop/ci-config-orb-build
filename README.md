@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.0.63
+  build: mojaloop/build@1.0.64
 workflows:
   setup:
     jobs:
@@ -25,8 +25,29 @@ workflows:
           filters:
             tags:
               only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/
-          # optionally supply the base image for the image scan
-          # base_image: org/image
+          # optionally supply the resource_class for the jobs
+          # pr_title_check_resource_class: medium
+          # setup_resource_class: medium
+          # test_dependencies_resource_class: medium
+          # test_deprecations_resource_class: medium
+          # test_lint_resource_class: medium
+          # test_unit_resource_class: medium
+          # test_coverage_resource_class: medium
+          # vulnerability_check_resource_class: medium
+          # license_audit_resource_class: medium
+          # build_local_resource_class: medium
+          # test_integration_resource_class: medium
+          # test_functional_resource_class: medium
+          # license_scan_resource_class: medium
+          # grype_image_scan_resource_class: medium
+          # release_resource_class: medium
+          # github_release_resource_class: medium
+          # publish_docker_resource_class: medium
+          # publish_npm_resource_class: medium
+          # publish_docker_snapshot_resource_class: medium
+          # publish_npm_snapshot_resource_class: medium
+          # publish_npm_prerelease_resource_class: medium
+          # publish_docker_prerelease_resource_class: medium
 ```
 
 ### Vulnerability Image Scan Configuration

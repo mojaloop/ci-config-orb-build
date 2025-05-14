@@ -1,9 +1,15 @@
-executor: docker
+executor:
+  name: docker
+  resource_class: << parameters.resource_class >>
 parameters:
   ci-config-branch:
     description: The branch of mojaloop/ci-config to bootstrap from
     default: master
     type: string
+  resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
 steps:
   - pr_title_check:
       ci-config-branch: << parameters.ci-config-branch >>
