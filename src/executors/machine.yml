@@ -6,3 +6,10 @@ environment:
   BUILD_LIBRDKAFKA: 0
 machine:
   image: ubuntu-2404:2024.11.1 # Ref: https://circleci.com/developer/machine/image/ubuntu-2404
+parameters:
+  resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+    description: The resource class to use for the executor
+resource_class: << parameters.resource_class >>

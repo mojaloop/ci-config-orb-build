@@ -1,12 +1,18 @@
 description:
   This job executes the functional tests for the project.
-executor: machine
+executor:
+  name: machine
+  resource_class: << parameters.resource_class >>
 environment:
   ML_CORE_TEST_HARNESS_DIR: /tmp/ml-core-test-harness
 parameters:
   yarn_lock:
     type: string
     default: ''
+  resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
 steps:
   - checkout
   - attach_workspace:

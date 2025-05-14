@@ -1,9 +1,94 @@
 description: >
   Runs build and test workflow
 parameters:
-  base_image:
-    type: string
-    default: ''
+  pr_title_check_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  setup_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_dependencies_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_deprecations_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_lint_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_unit_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_coverage_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  vulnerability_check_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  license_audit_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  build_local_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_integration_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  test_functional_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  license_scan_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  grype_image_scan_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  release_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  github_release_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_docker_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_npm_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_docker_snapshot_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_npm_snapshot_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_npm_prerelease_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  publish_docker_prerelease_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
 executor: continuation/default
 steps:
   - checkout
@@ -14,7 +99,28 @@ steps:
       command: |
         echo "$SCRIPT" > /tmp/build_and_test.yml
         echo '{
-          "base_image":"<< parameters.base_image >>",
+          "pr_title_check_resource_class":"<< parameters.pr_title_check_resource_class>>",
+          "setup_resource_class":"<< parameters.setup_resource_class>>",
+          "test_dependencies_resource_class":"<< parameters.test_dependencies_resource_class>>",
+          "test_deprecations_resource_class":"<< parameters.test_deprecations_resource_class>>",
+          "test_lint_resource_class":"<< parameters.test_lint_resource_class>>",
+          "test_unit_resource_class":"<< parameters.test_unit_resource_class>>",
+          "test_coverage_resource_class":"<< parameters.test_coverage_resource_class>>",
+          "vulnerability_check_resource_class":"<< parameters.vulnerability_check_resource_class>>",
+          "license_audit_resource_class":"<< parameters.license_audit_resource_class>>",
+          "build_local_resource_class":"<< parameters.build_local_resource_class>>",
+          "test_integration_resource_class":"<< parameters.test_integration_resource_class>>",
+          "test_functional_resource_class":"<< parameters.test_functional_resource_class>>",
+          "license_scan_resource_class":"<< parameters.license_scan_resource_class>>",
+          "grype_image_scan_resource_class":"<< parameters.grype_image_scan_resource_class>>",
+          "release_resource_class":"<< parameters.release_resource_class>>",
+          "github_release_resource_class":"<< parameters.github_release_resource_class>>",
+          "publish_docker_resource_class":"<< parameters.publish_docker_resource_class>>",
+          "publish_npm_resource_class":"<< parameters.publish_npm_resource_class>>",
+          "publish_docker_snapshot_resource_class":"<< parameters.publish_docker_snapshot_resource_class>>",
+          "publish_npm_snapshot_resource_class":"<< parameters.publish_npm_snapshot_resource_class>>",
+          "publish_npm_prerelease_resource_class":"<< parameters.publish_npm_prerelease_resource_class>>",
+          "publish_docker_prerelease_resource_class":"<< parameters.publish_docker_prerelease_resource_class>>",
           "git_tag":"'$CIRCLE_CI_TAG'",
           "pull_request":"'$CIRCLE_PULL_REQUEST'",
           "yarn_lock":"'$(test -f yarn.lock && echo "true" || echo "")'",

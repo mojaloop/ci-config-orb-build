@@ -1,5 +1,7 @@
 description: Run code coverage check
-executor: docker
+executor:
+  name: docker
+  resource_class: << parameters.resource_class >>
 environment:
   MAIN_BRANCH_NAME: main
 parameters:
@@ -9,6 +11,10 @@ parameters:
   aws:
     type: string
     default: ''
+  resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
 steps:
   - docker_dependencies
   - when:
