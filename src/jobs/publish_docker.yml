@@ -42,7 +42,7 @@ steps:
         docker load -i /tmp/docker-image.tar
   - run:
       name: Login to container registry
-      command: docker login $DOCKER_REGISTRY -u $DOCKER_USER -p $DOCKER_PASS
+      command: docker login $PUBLISH_CONTAINER_REGISTRY -u $DOCKER_USER -p $DOCKER_PASS
   - run:
       name: Re-tag pre built image
       command: |
