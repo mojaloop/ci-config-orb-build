@@ -31,6 +31,40 @@ steps:
         echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
         echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
   - run:
+    name: Generate SBOM
+    command: |
+      if ls | grep -Eq '^sbom-npm-v[0-9]+\.[0-9]+\.[0-9]+\.csv$'; then
+        echo "Found SBOM, running NPM SBOM script"
+        git clone https://github.com/mojaloop/ml-depcheck-utility.git ./tmp/ml-depcheck-utility
+        cd tmp/ml-depcheck-utility
+        npm install
+        cd ../../
+        rm sbom-npm-v*.csv
+        bash tmp/ml-depcheck-utility/src/individual-repo/npm/generate-sbom.sh
+        sbom_file=$(ls sbom-npm-v*.csv 2>/dev/null || true)
+        if [ -n "$sbom_file" ]; then
+          git add "$sbom_file"
+          git commit -m "chore(sbom): add $sbom_file [skip ci]" || echo "No changes to commit"
+          git push origin ${CIRCLE_BRANCH} || echo "Git push failed"
+        fi
+      elif ls | grep -Eq '^sbom-yarn-v[0-9]+\.[0-9]+\.[0-9]+\.csv$'; then
+        echo "Found SBOM, running YARN SBOM script"
+        git clone https://github.com/mojaloop/ml-depcheck-utility.git ./tmp/ml-depcheck-utility
+        cd tmp/ml-depcheck-utility
+        npm install
+        cd ../../
+        rm sbom-yarn-v*.csv
+        bash tmp/ml-depcheck-utility/src/individual-repo/yarn/generate-sbom.sh
+        sbom_file=$(ls sbom-yarn-v*.csv 2>/dev/null || true)
+        if [ -n "$sbom_file" ]; then
+          git add "$sbom_file"
+          git commit -m "chore(sbom): add $sbom_file [skip ci]" || echo "No changes to commit"
+          git push origin ${CIRCLE_BRANCH} || echo "Git push failed"
+        fi
+      else
+        echo "No SBOM CSV file found"
+      fi
+  - run:
       name: Generate changelog and bump package version
       command: npm run release -- --no-verify
   - run:
