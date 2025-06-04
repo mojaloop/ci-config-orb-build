@@ -22,4 +22,9 @@ steps:
       yarn_lock: << parameters.yarn_lock >>
   - run:
       name: Execute deprecations tests
-      command: npx --yes @mojaloop/ml-depcheck-utility@1.0.7 check-deprecations -y
+      command: |
+        if [ -f yarn.lock ]; then
+          npx -y --package @mojaloop/ml-depcheck-utility@1.0.10 check-deprecations-yarn --yes
+        else
+          npx -y --package @mojaloop/ml-depcheck-utility@1.0.10 check-deprecations-npm --yes
+        fi
