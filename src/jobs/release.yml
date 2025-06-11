@@ -33,36 +33,32 @@ steps:
   - run:
       name: Generate SBOM
       command: |
-        if ls | grep -Eq '^sbom-npm-v[0-9]+\.[0-9]+\.[0-9]+\.csv$'; then
-          echo "Found SBOM, running NPM SBOM script"
-          git clone https://github.com/mojaloop/ml-depcheck-utility.git ./tmp/ml-depcheck-utility
-          cd tmp/ml-depcheck-utility
-          npm install
-          cd ../../
-          rm sbom-npm-v*.csv
-          bash tmp/ml-depcheck-utility/src/individual-repo/npm/generate-sbom.sh
-          sbom_file=$(ls sbom-npm-v*.csv 2>/dev/null || true)
-          if [ -n "$sbom_file" ]; then
-            git add "$sbom_file"
-            git commit -m "chore(sbom): add $sbom_file [skip ci]" || echo "No changes to commit"
-            git push origin ${CIRCLE_BRANCH} || echo "Git push failed"
+        if ls | grep -Eq '^sbom-v[0-9]+\.[0-9]+\.[0-9]+\.csv$'; then
+          echo "Found SBOM file"
+          # Delete existing SBOM files
+          echo "Deleting old SBOM files..."
+          rm -f sbom-v*.csv
+          # Generate new SBOM
+          if [ -f yarn.lock ]; then
+            echo "Detected yarn.lock, generating SBOM using Yarn"
+            npx -y --package @mojaloop/ml-depcheck-utility@1.1.0 generate-sbom-yarn "${CIRCLE_TAG}" --yes
+          else
+            echo "No yarn.lock found, generating SBOM using NPM"
+            npx -y --package @mojaloop/ml-depcheck-utility@1.1.0 generate-sbom-npm "${CIRCLE_TAG}" --yes
           fi
-        elif ls | grep -Eq '^sbom-yarn-v[0-9]+\.[0-9]+\.[0-9]+\.csv$'; then
-          echo "Found SBOM, running YARN SBOM script"
-          git clone https://github.com/mojaloop/ml-depcheck-utility.git ./tmp/ml-depcheck-utility
-          cd tmp/ml-depcheck-utility
-          npm install
-          cd ../../
-          rm sbom-yarn-v*.csv
-          bash tmp/ml-depcheck-utility/src/individual-repo/yarn/generate-sbom.sh
-          sbom_file=$(ls sbom-yarn-v*.csv 2>/dev/null || true)
+          # Get the new sbom filename
+          sbom_file=$(ls sbom-v*.csv 2>/dev/null || true)
+          # Commit and push if new SBOM file is generated
           if [ -n "$sbom_file" ]; then
-            git add "$sbom_file"
-            git commit -m "chore(sbom): add $sbom_file [skip ci]" || echo "No changes to commit"
-            git push origin ${CIRCLE_BRANCH} || echo "Git push failed"
+            git rm sbom-v*.csv 2>/dev/null || true 
+            git add "$sbom_file"        
+            git commit -m "chore(sbom): update $sbom_file [skip ci]" || echo "No changes to commit"
+            git push origin "${CIRCLE_BRANCH}" || echo "Git push failed"
+          else
+            echo "No new SBOM file found after generation"
           fi
         else
-          echo "No SBOM CSV file found"
+          echo "No matching sbom-v<version>.csv found. Skipping SBOM generation."
         fi
   - run:
       name: Generate changelog and bump package version
