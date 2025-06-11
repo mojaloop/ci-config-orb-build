@@ -50,8 +50,8 @@ steps:
           sbom_file=$(ls sbom-v*.csv 2>/dev/null || true)
           # Commit and push if new SBOM file is generated
           if [ -n "$sbom_file" ]; then
-            git rm sbom-v*.csv 2>/dev/null || true 
-            git add "$sbom_file"        
+            git rm sbom-v*.csv 2>/dev/null || true
+            git add "$sbom_file"
             git commit -m "chore(sbom): update $sbom_file [skip ci]" || echo "No changes to commit"
             git push origin "${CIRCLE_BRANCH}" || echo "Git push failed"
           else
