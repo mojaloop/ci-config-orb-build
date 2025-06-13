@@ -42,6 +42,34 @@ steps:
         echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
         echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
   - run:
+      name: Generate SBOM
+      command: |
+        if ls | grep -Eq '^sbom-*.csv$'; then
+          echo "Found SBOM file"
+          git rm sbom-*.csv 2>/dev/null || true
+          rm -f sbom-*.csv
+          # Generate new SBOM
+          if [ -f yarn.lock ]; then
+            echo "Generating SBOM using Yarn"
+            npx -y --package @mojaloop/ml-depcheck-utility@1.1.0 generate-sbom-yarn --yes
+          else
+            echo "Generating SBOM using NPM"
+            npx -y --package @mojaloop/ml-depcheck-utility@1.1.0 generate-sbom-npm --yes
+          fi
+          # Get the new sbom filename
+          sbom_file=$(ls sbom-*.csv 2>/dev/null || true)
+          # Commit and push if new SBOM file is generated
+          if [ -n "$sbom_file" ]; then
+            git add "$sbom_file"
+            git commit -m "chore(sbom): update $sbom_file [skip ci]" || echo "No changes to commit"
+            git push origin "${CIRCLE_BRANCH}" || echo "Git push failed"
+          else
+            echo "No new SBOM file found after generation"
+          fi
+        else
+          echo "No matching sbom-<version>.csv found. Skipping SBOM generation."
+        fi
+  - run:
       name: Create Release
       command: |
         gh release create "v${RELEASE_TAG}" --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} --title "v${RELEASE_TAG} Release" --draft=false --notes "${RELEASE_CHANGES}" ./CHANGELOG.md

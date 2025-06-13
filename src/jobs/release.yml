@@ -31,34 +31,6 @@ steps:
         echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
         echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
   - run:
-      name: Generate SBOM
-      command: |
-        if ls | grep -Eq '^sbom-*.csv$'; then
-          echo "Found SBOM file"
-          git rm sbom-*.csv 2>/dev/null || true
-          rm -f sbom-*.csv
-          # Generate new SBOM
-          if [ -f yarn.lock ]; then
-            echo "Detected yarn.lock, generating SBOM using Yarn"
-            npx -y --package @mojaloop/ml-depcheck-utility@1.1.0 generate-sbom-yarn "v${RELEASE_TAG}" --yes
-          else
-            echo "No yarn.lock found, generating SBOM using NPM"
-            npx -y --package @mojaloop/ml-depcheck-utility@1.1.0 generate-sbom-npm "v${RELEASE_TAG}" --yes
-          fi
-          # Get the new sbom filename
-          sbom_file=$(ls sbom-*.csv 2>/dev/null || true)
-          # Commit and push if new SBOM file is generated
-          if [ -n "$sbom_file" ]; then
-            git add "$sbom_file"
-            git commit -m "chore(sbom): update $sbom_file [skip ci]" || echo "No changes to commit"
-            git push origin "${CIRCLE_BRANCH}" || echo "Git push failed"
-          else
-            echo "No new SBOM file found after generation"
-          fi
-        else
-          echo "No matching sbom-<version>.csv found. Skipping SBOM generation."
-        fi
-  - run:
       name: Generate changelog and bump package version
       command: npm run release -- --no-verify
   - run:
