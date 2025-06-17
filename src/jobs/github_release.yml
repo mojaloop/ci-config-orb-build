@@ -51,10 +51,10 @@ steps:
           # Generate new SBOM
           if [ -f yarn.lock ]; then
             echo "Generating SBOM using Yarn"
-            npx -y --package @mojaloop/ml-depcheck-utility@1.1.0 generate-sbom-yarn
+            npx -y --package @mojaloop/ml-depcheck-utility@1.1.1 generate-sbom-yarn
           else
             echo "Generating SBOM using NPM"
-            npx -y --package @mojaloop/ml-depcheck-utility@1.1.0 generate-sbom-npm
+            npx -y --package @mojaloop/ml-depcheck-utility@1.1.1 generate-sbom-npm
           fi
           # Get the new sbom filename
           sbom_file=$(ls sbom-*.csv 2>/dev/null || true)
