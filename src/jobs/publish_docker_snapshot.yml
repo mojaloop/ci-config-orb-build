@@ -42,7 +42,7 @@ steps:
         docker load -i /tmp/docker-image.tar
   - run:
       name: Login to Docker Hub
-      command: docker login -u $DOCKER_USER -p $DOCKER_PASS
+      command: echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
   - run:
       name: Re-tag pre built image
       command: |
