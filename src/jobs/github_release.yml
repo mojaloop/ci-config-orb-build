@@ -44,7 +44,7 @@ steps:
   - run:
       name: Generate SBOM
       command: |
-        if ls | grep -Eq '^sbom-*.csv$'; then
+        if compgen -G "sbom-*.csv" > /dev/null; then
           echo "Found SBOM file"
           git rm sbom-*.csv 2>/dev/null || true
           rm -f sbom-*.csv
