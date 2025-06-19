@@ -44,9 +44,8 @@ steps:
   - run:
       name: Generate SBOM
       command: |
-        if compgen -G "sbom-*.csv" > /dev/null; then
+        if ls | grep -Eq '^sbom-v[0-9]+\.[0-9]+\.[0-9]+\.csv$'; then
           echo "Found SBOM file"
-          git rm sbom-*.csv 2>/dev/null || true
           rm -f sbom-*.csv
           # Generate new SBOM
           if [ -f yarn.lock ]; then
@@ -56,16 +55,9 @@ steps:
             echo "Generating SBOM using NPM"
             npx -y --package @mojaloop/ml-depcheck-utility@1.1.1 generate-sbom-npm
           fi
-          # Get the new sbom filename
-          sbom_file=$(ls sbom-*.csv 2>/dev/null || true)
-          # Commit and push if new SBOM file is generated
-          if [ -n "$sbom_file" ]; then
-            git add "$sbom_file"
-            git commit -m "chore(sbom): update $sbom_file [skip ci]" || echo "No changes to commit"
-            git push origin "${CIRCLE_BRANCH}" || echo "Git push failed"
-          else
-            echo "No new SBOM file found after generation"
-          fi
+          git add .
+          git commit -m "chore(sbom): update sbom [skip ci]" || echo "No changes to commit"
+          git push origin "${CIRCLE_BRANCH}" || echo "Git push failed"
         else
           echo "No matching sbom-<version>.csv found. Skipping SBOM generation."
         fi
