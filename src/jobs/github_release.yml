@@ -45,6 +45,7 @@ steps:
       name: Generate SBOM
       command: |
         if ls | grep -Eq '^sbom-v[0-9]+\.[0-9]+\.[0-9]+\.csv$'; then
+          git pull origin "${CIRCLE_BRANCH}" || echo "Git pull failed"
           echo "Found SBOM file"
           rm -f sbom-*.csv
           # Generate new SBOM
@@ -55,7 +56,6 @@ steps:
             echo "Generating SBOM using NPM"
             npx -y --package @mojaloop/ml-depcheck-utility@1.1.3 generate-sbom-npm
           fi
-          git pull origin "${CIRCLE_BRANCH}" || echo "Git pull failed"
           git add .
           git commit -m "chore(sbom): update sbom [skip ci]" || echo "No changes to commit"
           git push origin "${CIRCLE_BRANCH}" || echo "Git push failed"
