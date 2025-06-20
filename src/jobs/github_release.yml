@@ -45,7 +45,9 @@ steps:
       name: Generate SBOM
       command: |
         if ls | grep -Eq '^sbom-v[0-9]+\.[0-9]+\.[0-9]+\.csv$'; then
-          git pull origin "${CIRCLE_BRANCH}" || echo "Git pull failed"
+          git fetch origin "$CIRCLE_BRANCH"
+          git checkout -B "$CIRCLE_BRANCH" "origin/$CIRCLE_BRANCH"
+          git pull --rebase origin "${CIRCLE_BRANCH}" || echo "Git pull failed"
           echo "Found SBOM file"
           rm -f sbom-*.csv
           # Generate new SBOM
