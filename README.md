@@ -81,6 +81,63 @@ check-for-app-update: false
 
 To completely disable the Grype image scan, set `disabled: true` in your `.grype.yaml` file. This will cause the scan job to exit successfully without performing any checks.
 
+### Additional Workflows
+
+The orb supports merging additional workflows and jobs into the standard build pipeline. This feature allows you to extend the CI/CD pipeline with custom jobs while maintaining the benefits of the standard workflow.
+
+To use this feature, create a `.circleci/additional-workflows.yaml` file in your repository root. The orb will automatically detect this file and merge it with the standard workflow configuration.
+
+#### Example: Adding a Custom Job
+
+Create `.circleci/additional-workflows.yaml`:
+
+```yaml
+jobs:
+  custom-build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Custom build step
+          command: |
+            echo "Running custom build logic"
+            # Add your custom commands here
+
+workflows:
+  build_and_test:
+    jobs:
+      - custom-build:
+          name: Custom Build Job
+          context: org-global
+          filters:
+            tags:
+              only: /v\d+(\.\d+){2}/
+          requires:
+            - Lint
+            - Unit tests
+```
+
+#### How Additional Workflows Merge Works
+
+1. The orb first generates the standard `build_and_test` workflow
+2. If `.circleci/additional-workflows.yaml` exists, it merges the additional configuration
+3. Jobs from the additional file are added to the existing workflow
+4. Workflow definitions are merged, allowing you to extend the standard pipeline
+
+This feature is particularly useful for:
+- Building additional Docker images
+- Adding custom deployment steps
+- Running specialized tests or scans
+- Integrating with external services
+
+#### Important Notes
+
+- The additional workflows file must be valid YAML
+- Job names should be unique to avoid conflicts
+- You can reference standard jobs in `requires` sections (e.g., `Lint`, `Unit tests`, `Integration tests`, etc.)
+- The merge process uses deep merge, so nested configurations are properly combined
+
 ### Conventions
 
 - If a `Dockerfile` is present in the root of the repository, it will be used to
