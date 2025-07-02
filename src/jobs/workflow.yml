@@ -137,6 +137,7 @@ steps:
           chmod +x /tmp/yq
           /tmp/yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' /tmp/build_and_test.yml .circleci/additional-workflows.yaml > /tmp/merged-config.yml
           mv /tmp/merged-config.yml /tmp/build_and_test.yml
+          cat /tmp/build_and_test.yml
         fi
   - continuation/continue:
       configuration_path: /tmp/build_and_test.yml
