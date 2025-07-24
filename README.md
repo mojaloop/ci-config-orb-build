@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.0.76
+  build: mojaloop/build@1.1.1
 workflows:
   setup:
     jobs:
