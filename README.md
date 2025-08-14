@@ -50,13 +50,23 @@ workflows:
           # publish_docker_prerelease_resource_class: medium
 ```
 
-### Vulnerability Image Scan Configuration
+### Vulnerability Scan Configuration
 
-The repo using the orb, must declare a .grype.yaml file in the root of the repo.
-As necessary vulnerabilities can be ignored per following example:
+The repo using the orb must declare a `.grype.yaml` file in the root of the repo. The orb includes both image and source scan jobs, but only the appropriate one will execute based on your configuration.
+
+#### Scan Type Configuration
+
+You can explicitly specify the scan type in your `.grype.yaml`:
 
 ```yaml
-# Set to true to disable the Grype image scan completely
+# Specify the type of scan (optional)
+# Values: "image" for Docker image scan, "source" for source code scan
+# If not specified, the orb will auto-detect:
+#   - If Dockerfile exists: runs image scan
+#   - If no Dockerfile exists: runs source scan
+scan-type: source  # or "image"
+
+# Set to true to disable Grype scanning completely
 disabled: false
 
 ignore:
@@ -72,14 +82,44 @@ output:
   - "table"
   - "json"
 
-# Modify your CircleCI job to check critical count
+# For image scans - modify scope
 search:
   scope: "squashed"
 quiet: false
 check-for-app-update: false
 ```
 
-To completely disable the Grype image scan, set `disabled: true` in your `.grype.yaml` file. This will cause the scan job to exit successfully without performing any checks.
+#### How It Works
+
+The workflow includes both `grype_image_scan` and `grype_source_scan` jobs. Each job checks your configuration and only runs when appropriate:
+
+- **`grype_image_scan`**: Executes when `scan-type: image` is set or a Dockerfile exists
+- **`grype_source_scan`**: Executes when `scan-type: source` is set or no Dockerfile exists
+- Only one scan type will run per build
+
+#### Scan Types
+
+1. **Docker Image Scan** (`scan-type: image`):
+   - Used for repositories that build Docker images
+   - Scans the built Docker image for vulnerabilities
+   - Requires a Dockerfile in the repository
+   - The image must be built in the Build job
+   - Runs after the Build job completes
+
+2. **Source Code Scan** (`scan-type: source`):
+   - Used for library repositories without Docker images
+   - Scans the source code and dependencies directly
+   - Analyzes package.json, package-lock.json, and other dependency files
+   - No Docker image required
+   - Runs after the Setup job completes
+
+#### Auto-detection
+
+If `scan-type` is not specified in `.grype.yaml`, the orb will automatically determine which scan to run:
+- If a `Dockerfile` exists in the repository root → `grype_image_scan` runs
+- If no `Dockerfile` exists → `grype_source_scan` runs
+
+To completely disable Grype scanning, set `disabled: true` in your `.grype.yaml` file. This will cause both scan jobs to skip successfully.
 
 ### Additional Workflows
 

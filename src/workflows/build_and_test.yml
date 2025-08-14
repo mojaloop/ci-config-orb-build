@@ -188,7 +188,7 @@ workflows:
           <<: *test-docker
           name: Functional tests
           resource_class: << pipeline.parameters.test_functional_resource_class >>
-      - build/license_scan: &scan
+      - build/license_scan:
           name: License scan
           resource_class: << pipeline.parameters.license_scan_resource_class >>
           context: org-global
@@ -199,7 +199,7 @@ workflows:
             tags: *setup-tags
           requires:
             - Build
-      - build/grype_image_scan: &grype_image_scan
+      - build/grype_image_scan:
           name: Grype image scan
           resource_class: << pipeline.parameters.grype_image_scan_resource_class >>
           context: org-global
@@ -209,6 +209,16 @@ workflows:
             tags: *setup-tags
           requires:
             - Build
+      - build/grype_source_scan:
+          name: Grype source scan
+          resource_class: << pipeline.parameters.grype_image_scan_resource_class >>
+          context: org-global
+          filters:
+            branches:
+              only: /.*/
+            tags: *setup-tags
+          requires:
+            - Setup
       - build/release:
           name: Release
           resource_class: << pipeline.parameters.release_resource_class >>
@@ -231,6 +241,7 @@ workflows:
             - License audit
             - License scan
             - Grype image scan
+            - Grype source scan
       - build/github_release:
           name: GitHub release
           resource_class: << pipeline.parameters.github_release_resource_class >>
@@ -293,6 +304,7 @@ workflows:
             - License audit
             - License scan
             - Grype image scan
+            - Grype source scan
       - build/publish_docker_prerelease:
           name: Docker prerelease
           resource_class: << pipeline.parameters.publish_docker_prerelease_resource_class >>

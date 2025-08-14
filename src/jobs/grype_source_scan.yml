@@ -1,5 +1,5 @@
 description: |
-  This job scans the Docker image for vulnerabilities using Grype.
+  This job scans the source code for vulnerabilities using Grype.
 executor:
   name: machine
   resource_class: << parameters.resource_class >>
@@ -15,8 +15,6 @@ parameters:
     default: medium
 steps:
   - checkout
-  - attach_workspace:
-      at: /tmp
   - run:
       name: Check for Grype config and scan type
       command: |
@@ -28,27 +26,27 @@ steps:
 
         # Check if scan is disabled
         if grep -q "disabled: true" .grype.yaml; then
-          echo "Grype image scan is disabled in .grype.yaml"
+          echo "Grype source scan is disabled in .grype.yaml"
           circleci-agent step halt
         fi
 
-        # Determine if image scan should run
-        SHOULD_RUN_IMAGE="false"
+        # Determine if source scan should run
+        SHOULD_RUN_SOURCE="false"
         
         # Check explicit scan-type configuration
-        if grep -q "scan-type: image" .grype.yaml; then
-          SHOULD_RUN_IMAGE="true"
-          echo "scan-type: image found in .grype.yaml - running image scan"
-        elif grep -q "scan-type: source" .grype.yaml; then
-          echo "scan-type: source found in .grype.yaml - skipping image scan"
+        if grep -q "scan-type: source" .grype.yaml; then
+          SHOULD_RUN_SOURCE="true"
+          echo "scan-type: source found in .grype.yaml - running source scan"
+        elif grep -q "scan-type: image" .grype.yaml; then
+          echo "scan-type: image found in .grype.yaml - skipping source scan"
           circleci-agent step halt
         else
           # Auto-detect based on Dockerfile presence
-          if [ -f Dockerfile ]; then
-            SHOULD_RUN_IMAGE="true"
-            echo "Dockerfile found and no scan-type specified - running image scan"
+          if [ ! -f Dockerfile ]; then
+            SHOULD_RUN_SOURCE="true"
+            echo "No Dockerfile found and no scan-type specified - running source scan"
           else
-            echo "No Dockerfile found and no scan-type specified - skipping image scan (source scan will run)"
+            echo "Dockerfile found and no scan-type specified - skipping source scan (image scan will run)"
             circleci-agent step halt
           fi
         fi
@@ -60,20 +58,16 @@ steps:
           sudo apt-get update && sudo apt-get install -y jq
         fi
   - run:
-      name: Load the pre-built docker image from workspace
-      command: docker load -i /tmp/docker-image.tar
-  - run:
       name: Install Grype
       command: |
         curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
   - run:
-      name: Run Grype scan with custom config
+      name: Run Grype source code scan with custom config
       command: |
-        IMAGE_NAME="${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local"
-        echo "Scanning image: $IMAGE_NAME"
-        # Use the config file in your repo
-        grype $IMAGE_NAME -c .grype.yaml -o table > grype-results.txt
-        grype $IMAGE_NAME -c .grype.yaml -o json > grype-results.json
+        echo "Scanning source code in current directory"
+        # Use the config file in your repo to scan the source code
+        grype dir:. -c .grype.yaml -o table > grype-results.txt
+        grype dir:. -c .grype.yaml -o json > grype-results.json
         cat grype-results.txt
         cat grype-results.json
   - run:
