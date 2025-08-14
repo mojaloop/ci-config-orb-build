@@ -34,7 +34,7 @@ steps:
 
         # Determine if image scan should run
         SHOULD_RUN_IMAGE="false"
-        
+
         # Check explicit scan-type configuration
         if grep -q "scan-type: image" .grype.yaml; then
           SHOULD_RUN_IMAGE="true"

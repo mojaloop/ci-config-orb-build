@@ -32,7 +32,7 @@ steps:
 
         # Determine if source scan should run
         SHOULD_RUN_SOURCE="false"
-        
+
         # Check explicit scan-type configuration
         if grep -q "scan-type: source" .grype.yaml; then
           SHOULD_RUN_SOURCE="true"
@@ -103,3 +103,4 @@ steps:
   - store_artifacts:
       path: grype-results.txt
       destination: grype-scan/scan-results.txt
+      
