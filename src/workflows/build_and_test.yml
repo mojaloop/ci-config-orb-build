@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.1.1
+  build: mojaloop/build@1.1.2
 parameters:
   git_tag:
     type: string
@@ -188,7 +188,7 @@ workflows:
           <<: *test-docker
           name: Functional tests
           resource_class: << pipeline.parameters.test_functional_resource_class >>
-      - build/license_scan: &scan
+      - build/license_scan:
           name: License scan
           resource_class: << pipeline.parameters.license_scan_resource_class >>
           context: org-global
@@ -199,8 +199,8 @@ workflows:
             tags: *setup-tags
           requires:
             - Build
-      - build/grype_image_scan: &grype_image_scan
-          name: Grype image scan
+      - build/grype_scan:
+          name: Grype scan
           resource_class: << pipeline.parameters.grype_image_scan_resource_class >>
           context: org-global
           filters:
@@ -230,7 +230,7 @@ workflows:
             - Vulnerability check
             - License audit
             - License scan
-            - Grype image scan
+            - Grype scan
       - build/github_release:
           name: GitHub release
           resource_class: << pipeline.parameters.github_release_resource_class >>
@@ -292,7 +292,7 @@ workflows:
             - Functional tests
             - License audit
             - License scan
-            - Grype image scan
+            - Grype scan
       - build/publish_docker_prerelease:
           name: Docker prerelease
           resource_class: << pipeline.parameters.publish_docker_prerelease_resource_class >>

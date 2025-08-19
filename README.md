@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.1.1
+  build: mojaloop/build@1.1.2
 workflows:
   setup:
     jobs:
@@ -50,13 +50,23 @@ workflows:
           # publish_docker_prerelease_resource_class: medium
 ```
 
-### Vulnerability Image Scan Configuration
+### Vulnerability Scan Configuration
 
-The repo using the orb, must declare a .grype.yaml file in the root of the repo.
-As necessary vulnerabilities can be ignored per following example:
+The repo using the orb must declare a `.grype.yaml` file in the root of the repo. Grype will automatically determine whether to scan a Docker image or source code based on the configuration.
+
+#### Scan Type Configuration
+
+You can explicitly specify the scan type in your `.grype.yaml`:
 
 ```yaml
-# Set to true to disable the Grype image scan completely
+# Specify the type of scan (optional)
+# Values: "image" for Docker image scan, "source" for source code scan
+# If not specified, the orb will auto-detect:
+#   - If Dockerfile exists: runs image scan
+#   - If no Dockerfile exists: runs source scan
+scan-type: source  # or "image"
+
+# Set to true to disable Grype scanning completely
 disabled: false
 
 ignore:
@@ -72,14 +82,34 @@ output:
   - "table"
   - "json"
 
-# Modify your CircleCI job to check critical count
+# For image scans - modify scope
 search:
   scope: "squashed"
 quiet: false
 check-for-app-update: false
 ```
 
-To completely disable the Grype image scan, set `disabled: true` in your `.grype.yaml` file. This will cause the scan job to exit successfully without performing any checks.
+#### Scan Types
+
+1. **Docker Image Scan** (`scan-type: image`):
+   - Used for repositories that build Docker images
+   - Scans the built Docker image for vulnerabilities
+   - Requires a Dockerfile in the repository
+   - The image must be built in the Build job
+
+2. **Source Code Scan** (`scan-type: source`):
+   - Used for library repositories without Docker images
+   - Scans the source code and dependencies directly
+   - Analyzes package.json, package-lock.json, and other dependency files
+   - No Docker image required
+
+#### Auto-detection
+
+If `scan-type` is not specified in `.grype.yaml`, the orb will automatically determine the scan type:
+- If a `Dockerfile` exists in the repository root → performs image scan
+- If no `Dockerfile` exists → performs source code scan
+
+To completely disable Grype scanning, set `disabled: true` in your `.grype.yaml` file. This will cause the scan job to exit successfully without performing any checks.
 
 ### Additional Workflows
 
