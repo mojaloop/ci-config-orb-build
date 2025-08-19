@@ -208,4 +208,3 @@ steps:
   - store_artifacts:
       path: grype-results.txt
       destination: grype-scan/scan-results.txt
-      
