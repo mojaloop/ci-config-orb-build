@@ -35,7 +35,7 @@ steps:
 
         # Determine scan type
         SCAN_TYPE=""
-        
+
         # Check explicit scan-type configuration (handle spaces, quotes, etc.)
         if grep -E '^\s*scan-type:\s*["\']?source["\']?\s*$' .grype.yaml; then
           SCAN_TYPE="source"
@@ -86,13 +86,13 @@ steps:
       command: |
         echo "Installing Grype vulnerability scanner..."
         curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
-        
+
         # Verify installation succeeded
         if ! command -v grype &> /dev/null; then
           echo "Error: Grype installation failed - command not found"
           exit 1
         fi
-        
+
         # Display version for debugging
         echo "Grype installed successfully:"
         grype version
@@ -100,11 +100,11 @@ steps:
       name: Run Grype scan
       command: |
         set -e  # Exit on error
-        
+
         if [ "$GRYPE_SCAN_TYPE" = "image" ]; then
           IMAGE_NAME="${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local"
           echo "Scanning Docker image: $IMAGE_NAME"
-          
+
           # Verify image exists before scanning
           if ! docker images | grep -q "$CIRCLE_PROJECT_REPONAME.*local"; then
             echo "Error: Docker image $IMAGE_NAME not found"
@@ -112,14 +112,14 @@ steps:
             docker images
             exit 1
           fi
-          
+
           # Run scan with error handling
           if ! grype $IMAGE_NAME -c .grype.yaml -o table > grype-results.txt 2>&1; then
             echo "Error: Grype image scan failed"
             cat grype-results.txt
             exit 1
           fi
-          
+
           # Generate JSON output
           if ! grype $IMAGE_NAME -c .grype.yaml -o json > grype-results.json 2>&1; then
             echo "Error: Failed to generate JSON output"
@@ -127,34 +127,34 @@ steps:
           fi
         else
           echo "Scanning source code in current directory"
-          
+
           # Run scan with error handling
           if ! grype dir:. -c .grype.yaml -o table > grype-results.txt 2>&1; then
             echo "Error: Grype source scan failed"
             cat grype-results.txt
             exit 1
           fi
-          
+
           # Generate JSON output
           if ! grype dir:. -c .grype.yaml -o json > grype-results.json 2>&1; then
             echo "Error: Failed to generate JSON output"
             exit 1
           fi
         fi
-        
+
         # Verify scan produced valid results
         if [ ! -s grype-results.json ]; then
           echo "Error: Grype scan produced empty results"
           exit 1
         fi
-        
+
         # Validate JSON format
         if ! jq empty grype-results.json 2>/dev/null; then
           echo "Error: Grype scan produced invalid JSON"
           head -20 grype-results.json
           exit 1
         fi
-        
+
         echo "=== Grype Scan Results ==="
         cat grype-results.txt
         echo ""
@@ -167,7 +167,7 @@ steps:
           echo "Error: Invalid JSON in grype-results.json"
           exit 1
         fi
-        
+
         # Count vulnerabilities in the filtered results (handle missing matches array)
         CRITICAL_COUNT=$(jq '[.matches[]? | select(.vulnerability.severity == "Critical")] | length' grype-results.json || echo "0")
         HIGH_COUNT=$(jq '[.matches[]? | select(.vulnerability.severity == "High")] | length' grype-results.json || echo "0")
@@ -208,3 +208,4 @@ steps:
   - store_artifacts:
       path: grype-results.txt
       destination: grype-scan/scan-results.txt
+      
