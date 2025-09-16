@@ -37,10 +37,10 @@ steps:
         SCAN_TYPE=""
 
         # Check explicit scan-type configuration (handle spaces, quotes, etc.)
-        if grep -E '^\s*scan-type:\s*["\']?source["\']?\s*$' .grype.yaml; then
+        if grep -E "^\s*scan-type:\s*[\"']?source[\"']?\s*$" .grype.yaml; then
           SCAN_TYPE="source"
           echo "scan-type: source found in .grype.yaml"
-        elif grep -E '^\s*scan-type:\s*["\']?image["\']?\s*$' .grype.yaml; then
+        elif grep -E "^\s*scan-type:\s*[\"']?image[\"']?\s*$" .grype.yaml; then
           SCAN_TYPE="image"
           echo "scan-type: image found in .grype.yaml"
         else
