@@ -4,8 +4,6 @@ description: |
 executor:
   name: machine
   resource_class: << parameters.resource_class >>
-environment:
-  BASH_ENV: ~/.bash_env
 parameters:
   resource_class:
     type: enum
