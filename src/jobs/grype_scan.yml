@@ -115,9 +115,10 @@ steps:
             exit 1
           fi
 
-          # Generate JSON output
-          if ! grype $IMAGE_NAME -c .grype.yaml -o json > grype-results.json 2>&1; then
+          # Generate JSON output (stderr to separate file to avoid JSON corruption)
+          if ! grype $IMAGE_NAME -c .grype.yaml -o json > grype-results.json 2>grype-json-errors.log; then
             echo "Error: Failed to generate JSON output"
+            cat grype-json-errors.log
             exit 1
           fi
         else
@@ -130,9 +131,10 @@ steps:
             exit 1
           fi
 
-          # Generate JSON output
-          if ! grype dir:. -c .grype.yaml -o json > grype-results.json 2>&1; then
+          # Generate JSON output (stderr to separate file to avoid JSON corruption)
+          if ! grype dir:. -c .grype.yaml -o json > grype-results.json 2>grype-json-errors.log; then
             echo "Error: Failed to generate JSON output"
+            cat grype-json-errors.log
             exit 1
           fi
         fi
@@ -148,6 +150,12 @@ steps:
           echo "Error: Grype scan produced invalid JSON"
           head -20 grype-results.json
           exit 1
+        fi
+
+        # Display any warnings from the scan
+        if [ -f grype-json-errors.log ] && [ -s grype-json-errors.log ]; then
+          echo "=== Grype Scan Warnings ==="
+          cat grype-json-errors.log
         fi
 
         echo "=== Grype Scan Results ==="
