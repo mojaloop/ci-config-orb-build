@@ -145,9 +145,11 @@ steps:
           exit 1
         fi
 
-        # Validate JSON format
-        if ! jq empty grype-results.json 2>/dev/null; then
-          echo "Error: Grype scan produced invalid JSON"
+        # Validate JSON format AND Schema
+        # We check if '.matches' is an array. If it's not (null or missing), this fails.
+        if ! jq -e '.matches | type == "array"' grype-results.json > /dev/null 2>&1; then
+          echo "Error: Grype scan produced invalid output or missing 'matches' array"
+          echo "File content snippet:"
           head -20 grype-results.json
           exit 1
         fi
