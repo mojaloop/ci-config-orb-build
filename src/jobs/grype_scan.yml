@@ -198,7 +198,7 @@ steps:
         fi
 
         echo "=== Grype Scan Results ==="
-        cat grype-results.txt || true
+        cat grype-results.txt
         echo ""
         echo "Scan completed successfully"
   - run:
