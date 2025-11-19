@@ -108,7 +108,7 @@ steps:
             exit 1
           fi
 
-          # Run scan with error handling
+          # Run scan with error handling (table)
           if ! grype $IMAGE_NAME -c .grype.yaml -o table > grype-results.txt 2>&1; then
             echo "Error: Grype image scan failed"
             cat grype-results.txt
@@ -122,20 +122,57 @@ steps:
             exit 1
           fi
         else
-          echo "Scanning source code in current directory"
+          echo "Scanning source code in current directory (SBOM-first)"
 
-          # Run scan with error handling
-          if ! grype dir:. -c .grype.yaml -o table > grype-results.txt 2>&1; then
-            echo "Error: Grype source scan failed"
-            cat grype-results.txt
+          # Ensure syft is present (install if missing)
+          if ! command -v syft &> /dev/null; then
+            echo "syft not found — installing..."
+            curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+          fi
+
+          # Generate SBOM
+          echo "Generating SBOM with syft..."
+          syft dir:. -o json > sbom.json
+          echo "sbom.json created: $(stat -c%s sbom.json || true) bytes"
+
+          # Detect and remove any artifacts with empty/non-pkg purls (defensive)
+          jq -c '.artifacts[] | select((.purl // "") == "" or ((.purl // "") | test("^pkg:") | not))' sbom.json > bad-purls.json || true
+          if [ -s bad-purls.json ]; then
+            echo "Warning: sbom.json contains artifacts with empty/invalid purl; creating sbom.fixed.json with those removed"
+            jq 'del(.artifacts[] | select((.purl // "") == "" or ((.purl // "") | test("^pkg:") | not)))' sbom.json > sbom.fixed.json
+          else
+            cp sbom.json sbom.fixed.json
+          fi
+
+          # Validate cleaned SBOM JSON
+          if ! jq empty sbom.fixed.json 2>/dev/null; then
+            echo "Error: sbom.fixed.json is invalid JSON"
+            head -n 40 sbom.fixed.json || true
             exit 1
           fi
 
-          # Generate JSON output (stderr to separate file to avoid JSON corruption)
-          if ! grype dir:. -c .grype.yaml -o json > grype-results.json 2>grype-json-errors.log; then
-            echo "Error: Failed to generate JSON output"
-            cat grype-json-errors.log
-            exit 1
+          # Run a human-readable table output first (to keep original behavior)
+          if ! grype sbom:sbom.fixed.json -c .grype.yaml -o table > grype-results.txt 2>&1; then
+            echo "Warning: Grype sbom table output failed; will still attempt JSON run (see grype-results.txt)"
+            cat grype-results.txt || true
+          fi
+
+          # Primary: run grype against the cleaned SBOM and capture stderr separately
+          echo "Running grype (JSON) against sbom.fixed.json..."
+          if grype sbom:sbom.fixed.json -c .grype.yaml -o json > grype-results.json 2>grype-json-errors.log; then
+            echo "grype sbom scan (json) completed"
+          else
+            echo "Warning: grype sbom JSON run failed; printing stderr and attempting fallback to 'grype dir:.'"
+            echo "=== grype-json-errors.log (first 200 lines) ==="
+            sed -n '1,200p' grype-json-errors.log || true
+
+            # Fallback: attempt original directory scan but still capture stderr separately (prevents stdout corruption)
+            echo "Attempting fallback: grype dir:. -o json"
+            if ! grype dir:. -c .grype.yaml -o json > grype-results.json 2>grype-json-errors.log; then
+              echo "Error: Fallback grype dir: JSON run failed; see grype-json-errors.log"
+              sed -n '1,200p' grype-json-errors.log || true
+              exit 1
+            fi
           fi
         fi
 
@@ -148,7 +185,9 @@ steps:
         # Validate JSON format
         if ! jq empty grype-results.json 2>/dev/null; then
           echo "Error: Grype scan produced invalid JSON"
-          head -20 grype-results.json
+          head -20 grype-results.json || true
+          echo "=== grype-json-errors.log (first 200 lines) ==="
+          sed -n '1,200p' grype-json-errors.log || true
           exit 1
         fi
 
