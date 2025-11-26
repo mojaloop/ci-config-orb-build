@@ -59,7 +59,7 @@ steps:
       command: |
         BASE_IMAGE=<< parameters.base_image >>
         if [ -z "$BASE_IMAGE" ]; then
-          BASE_IMAGE=node:$NVMRC_VERSION-alpine3.21
+          BASE_IMAGE=node:$NVMRC_VERSION-alpine3.22
         fi
         echo "export BASE_IMAGE=${BASE_IMAGE}" >> $BASH_ENV
   - run:
