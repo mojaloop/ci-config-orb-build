@@ -65,9 +65,33 @@ steps:
           echo "No matching sbom-<version>.csv found. Skipping SBOM generation."
         fi
   - run:
+      name: Build Release Assets
+      command: |
+        if npm run | grep -q "release:assets"; then
+          echo "Found release:assets script, building assets..."
+          RELEASE_ASSETS_DIR=$(mktemp -d)
+          echo "export RELEASE_ASSETS_DIR=$RELEASE_ASSETS_DIR" >> $BASH_ENV
+          npm run release:assets -- "$RELEASE_ASSETS_DIR"
+          echo "Assets built:"
+          ls -la "$RELEASE_ASSETS_DIR"
+        else
+          echo "No release:assets script found, skipping..."
+        fi
+  - run:
       name: Create Release
       command: |
         gh release create "v${RELEASE_TAG}" --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} --title "v${RELEASE_TAG} Release" --draft=false --notes "${RELEASE_CHANGES}" ./CHANGELOG.md
+  - run:
+      name: Upload Release Assets
+      command: |
+        if [ -n "$RELEASE_ASSETS_DIR" ] && [ -d "$RELEASE_ASSETS_DIR" ]; then
+          for asset in "$RELEASE_ASSETS_DIR"/*; do
+            if [ -f "$asset" ]; then
+              echo "Uploading: $(basename "$asset")"
+              gh release upload "v${RELEASE_TAG}" "$asset" --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+            fi
+          done
+        fi
   - when:
       condition: << parameters.slack >>
       steps:
