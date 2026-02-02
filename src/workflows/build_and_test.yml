@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.1.11
+  build: mojaloop/build@1.1.13
 parameters:
   git_tag:
     type: string
@@ -275,6 +275,18 @@ workflows:
           resource_class: << pipeline.parameters.publish_npm_snapshot_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           slack: << pipeline.parameters.slack >>
+      - build/github_release:
+          name: GitHub prerelease
+          resource_class: << pipeline.parameters.github_release_resource_class >>
+          slack: << pipeline.parameters.slack >>
+          context: org-global
+          filters:
+            branches:
+              ignore:
+                - /.*/
+            tags:
+              only: /v\d+(\.\d+){2}-(snapshot|hotfix|perf)\.\d+/
+          requires: *tests
       - build/publish_npm_prerelease:
           name: NPM prerelease
           resource_class: << pipeline.parameters.publish_npm_prerelease_resource_class >>
