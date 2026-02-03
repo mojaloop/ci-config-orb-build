@@ -78,7 +78,7 @@ steps:
       name: Create Release
       command: |
         PRERELEASE_FLAG=""
-        if echo "$RELEASE_TAG" | grep -qE "-(snapshot|hotfix|perf)\.[0-9]+$"; then
+        if [[ "$RELEASE_TAG" =~ -(snapshot|hotfix|perf)\.[0-9]+$ ]]; then
           PRERELEASE_FLAG="--prerelease"
           echo "Creating prerelease for $RELEASE_TAG"
         fi
