@@ -69,7 +69,7 @@ parameters:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
-  grype_image_scan_resource_class:
+  grype_scan_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
@@ -201,14 +201,14 @@ workflows:
             - Build
       - build/grype_scan:
           name: Grype scan
-          resource_class: << pipeline.parameters.grype_image_scan_resource_class >>
+          resource_class: << pipeline.parameters.grype_scan_resource_class >>
           context: org-global
           filters:
             branches:
               only: /.*/
             tags: *setup-tags
           requires:
-            - Build
+            - Setup
       - build/release:
           name: Release
           resource_class: << pipeline.parameters.release_resource_class >>

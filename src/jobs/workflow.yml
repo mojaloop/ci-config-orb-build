@@ -53,7 +53,7 @@ parameters:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
-  grype_image_scan_resource_class:
+  grype_scan_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
@@ -112,7 +112,7 @@ steps:
           "test_integration_resource_class":"<< parameters.test_integration_resource_class>>",
           "test_functional_resource_class":"<< parameters.test_functional_resource_class>>",
           "license_scan_resource_class":"<< parameters.license_scan_resource_class>>",
-          "grype_image_scan_resource_class":"<< parameters.grype_image_scan_resource_class>>",
+          "grype_scan_resource_class":"<< parameters.grype_scan_resource_class>>",
           "release_resource_class":"<< parameters.release_resource_class>>",
           "github_release_resource_class":"<< parameters.github_release_resource_class>>",
           "publish_docker_resource_class":"<< parameters.publish_docker_resource_class>>",
