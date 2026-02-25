@@ -21,12 +21,18 @@ steps:
         sudo apt-get update && sudo apt-get install -y git
   - gh/install
   - checkout
+  - attach_workspace:
+      at: /tmp
   - configure_git
   - run:
       name: Fetch updated release branch
       command: |
         git fetch origin
-        git checkout origin/${CIRCLE_BRANCH}
+        if [ -n "$CIRCLE_TAG" ]; then
+          echo "Running from tag $CIRCLE_TAG, skipping branch checkout"
+        else
+          git checkout origin/${CIRCLE_BRANCH}
+        fi
   - export_version_from_package
   - run:
       name: Check the release changes
@@ -44,6 +50,10 @@ steps:
   - run:
       name: Generate SBOM
       command: |
+        if [ -n "$CIRCLE_TAG" ]; then
+          echo "Running from tag, skipping SBOM generation"
+          exit 0
+        fi
         if ls | grep -Eq '^sbom-v[0-9]+\.[0-9]+\.[0-9]+\.csv$'; then
           git fetch origin "$CIRCLE_BRANCH"
           git checkout -B "$CIRCLE_BRANCH" "origin/$CIRCLE_BRANCH"
@@ -67,7 +77,28 @@ steps:
   - run:
       name: Create Release
       command: |
-        gh release create "v${RELEASE_TAG}" --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} --title "v${RELEASE_TAG} Release" --draft=false --notes "${RELEASE_CHANGES}" ./CHANGELOG.md
+        PRERELEASE_FLAG=""
+        if [[ "$RELEASE_TAG" =~ -(snapshot|hotfix|perf)\.[0-9]+$ ]]; then
+          PRERELEASE_FLAG="--prerelease"
+          echo "Creating prerelease for $RELEASE_TAG"
+        fi
+        gh release create "v${RELEASE_TAG}" $PRERELEASE_FLAG --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} --title "v${RELEASE_TAG} Release" --draft=false --notes "${RELEASE_CHANGES}" ./CHANGELOG.md
+  - run:
+      name: Upload Release Assets
+      command: |
+        RELEASE_ASSETS_DIR="/tmp/release-assets"
+        if [ -d "$RELEASE_ASSETS_DIR" ] && [ "$(ls -A $RELEASE_ASSETS_DIR 2>/dev/null)" ]; then
+          echo "Found release assets in workspace:"
+          ls -la "$RELEASE_ASSETS_DIR"
+          for asset in "$RELEASE_ASSETS_DIR"/*; do
+            if [ -f "$asset" ]; then
+              echo "Uploading: $(basename "$asset")"
+              gh release upload "v${RELEASE_TAG}" "$asset" --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+            fi
+          done
+        else
+          echo "No release assets found in workspace, skipping..."
+        fi
   - when:
       condition: << parameters.slack >>
       steps:
