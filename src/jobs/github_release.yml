@@ -21,6 +21,8 @@ steps:
         sudo apt-get update && sudo apt-get install -y git
   - gh/install
   - checkout
+  - attach_workspace:
+      at: /tmp
   - configure_git
   - run:
       name: Fetch updated release branch
@@ -68,6 +70,22 @@ steps:
       name: Create Release
       command: |
         gh release create "v${RELEASE_TAG}" --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} --title "v${RELEASE_TAG} Release" --draft=false --notes "${RELEASE_CHANGES}" ./CHANGELOG.md
+  - run:
+      name: Upload Release Assets
+      command: |
+        RELEASE_ASSETS_DIR="/tmp/release-assets"
+        if [ -d "$RELEASE_ASSETS_DIR" ] && [ "$(ls -A $RELEASE_ASSETS_DIR 2>/dev/null)" ]; then
+          echo "Found release assets in workspace:"
+          ls -la "$RELEASE_ASSETS_DIR"
+          for asset in "$RELEASE_ASSETS_DIR"/*; do
+            if [ -f "$asset" ]; then
+              echo "Uploading: $(basename "$asset")"
+              gh release upload "v${RELEASE_TAG}" "$asset" --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+            fi
+          done
+        else
+          echo "No release assets found in workspace, skipping..."
+        fi
   - when:
       condition: << parameters.slack >>
       steps:
