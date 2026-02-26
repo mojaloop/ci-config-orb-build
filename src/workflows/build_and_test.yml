@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.1.10
+  build: mojaloop/build@1.1.17
 parameters:
   git_tag:
     type: string
@@ -111,6 +111,7 @@ workflows:
     jobs:
       - build/pr_title_check:
           name: PR title
+          context: org-global
           resource_class: << pipeline.parameters.pr_title_check_resource_class >>
           filters:
             branches:
