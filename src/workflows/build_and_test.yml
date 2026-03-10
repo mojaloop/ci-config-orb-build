@@ -297,7 +297,7 @@ workflows:
       - build/publish_docker_prerelease:
           name: Docker prerelease
           resource_class: << pipeline.parameters.publish_docker_prerelease_resource_class >>
-          slack: << pipeline.parameters.slack >>
+          # slack: << pipeline.parameters.slack >>
           context: org-global
           filters: *only-prerelease-branches
           requires:
