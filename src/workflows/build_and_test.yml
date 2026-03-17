@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@1.1.10
+  build: mojaloop/build@1.1.17
 parameters:
   git_tag:
     type: string
@@ -69,7 +69,7 @@ parameters:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
-  grype_image_scan_resource_class:
+  grype_scan_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
@@ -111,6 +111,7 @@ workflows:
     jobs:
       - build/pr_title_check:
           name: PR title
+          context: org-global
           resource_class: << pipeline.parameters.pr_title_check_resource_class >>
           filters:
             branches:
@@ -201,14 +202,14 @@ workflows:
             - Build
       - build/grype_scan:
           name: Grype scan
-          resource_class: << pipeline.parameters.grype_image_scan_resource_class >>
+          resource_class: << pipeline.parameters.grype_scan_resource_class >>
           context: org-global
           filters:
             branches:
               only: /.*/
             tags: *setup-tags
           requires:
-            - Build
+            - Setup
       - build/release:
           name: Release
           resource_class: << pipeline.parameters.release_resource_class >>
@@ -291,7 +292,7 @@ workflows:
           name: NPM prerelease
           resource_class: << pipeline.parameters.publish_npm_prerelease_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
-          slack: << pipeline.parameters.slack >>
+          # slack: << pipeline.parameters.slack >>
           context: org-global
           filters: &only-prerelease-branches
             branches:
@@ -308,7 +309,7 @@ workflows:
       - build/publish_docker_prerelease:
           name: Docker prerelease
           resource_class: << pipeline.parameters.publish_docker_prerelease_resource_class >>
-          slack: << pipeline.parameters.slack >>
+          # slack: << pipeline.parameters.slack >>
           context: org-global
           filters: *only-prerelease-branches
           requires:
