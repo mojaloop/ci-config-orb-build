@@ -36,7 +36,20 @@ steps:
   - run:
       name: Save docker image to workspace
       command: docker save -o /tmp/docker-image.tar ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local
+  - run:
+      name: Build Release Assets
+      command: |
+        if npm run 2>/dev/null | grep -q "release:assets"; then
+          echo "Found release:assets script, building assets..."
+          mkdir -p /tmp/release-assets
+          npm run release:assets -- /tmp/release-assets
+          echo "Assets built:"
+          ls -la /tmp/release-assets
+        else
+          echo "No release:assets script found, skipping..."
+        fi
   - persist_to_workspace:
       root: /tmp
       paths:
         - ./docker-image.tar
+        - ./release-assets
