@@ -1,6 +1,7 @@
 description: |
   This job performs vulnerability scanning using Grype.
-  It automatically detects whether to scan Docker images or source code based on .grype.yaml configuration.
+  By default, it performs source code scanning. To scan a Docker image instead,
+  set scan-type: image in .grype.yaml (requires Build job to complete first).
 executor:
   name: machine
   resource_class: << parameters.resource_class >>
@@ -39,13 +40,13 @@ steps:
           SCAN_TYPE="image"
           echo "scan-type: image found in .grype.yaml"
         else
-          # Auto-detect based on Dockerfile presence
+          # Default to source scan for all repos
+          SCAN_TYPE="source"
           if [ -f Dockerfile ]; then
-            SCAN_TYPE="image"
-            echo "Dockerfile found and no scan-type specified - defaulting to image scan"
+            echo "Dockerfile found but no scan-type specified - defaulting to source scan"
+            echo "Set scan-type: image in .grype.yaml to scan the Docker image instead"
           else
-            SCAN_TYPE="source"
-            echo "No Dockerfile found and no scan-type specified - defaulting to source scan"
+            echo "No Dockerfile found - defaulting to source scan"
           fi
         fi
 
@@ -66,14 +67,16 @@ steps:
             docker load -i /tmp/docker-image.tar
             echo "Docker image loaded successfully"
           else
-            echo "Warning: Docker image tar file not found in workspace."
-            echo "This is expected for source-only repositories."
-            # Check if we actually have a Dockerfile and should have built an image
-            if [ -f Dockerfile ]; then
-              echo "Error: Dockerfile exists but no Docker image found in workspace."
-              echo "Make sure the Build job creates and persists the Docker image."
-              exit 1
-            fi
+            echo "Error: Docker image tar not found at /tmp/docker-image.tar."
+            echo "scan-type: image requires the Build job to complete before Grype scan."
+            echo ""
+            echo "Since grype_scan runs in parallel with Build by default, image scan repos"
+            echo "must ensure Build completes first. Options:"
+            echo "  1. Add a custom workflow override via .circleci/additional-workflows.yaml"
+            echo "     to make grype_scan require Build"
+            echo "  2. Switch to source scan (the default) by removing scan-type: image"
+            echo "     from .grype.yaml"
+            exit 1
           fi
         fi
   - run:
