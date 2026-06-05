@@ -81,6 +81,10 @@ parameters:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
+  github_prerelease_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
   publish_docker_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
@@ -276,10 +280,9 @@ workflows:
           resource_class: << pipeline.parameters.publish_npm_snapshot_resource_class >>
           yarn_lock: << pipeline.parameters.yarn_lock >>
           slack: << pipeline.parameters.slack >>
-      - build/github_release:
+      - build/github_prerelease:
           name: GitHub prerelease
-          resource_class: << pipeline.parameters.github_release_resource_class >>
-          slack: << pipeline.parameters.slack >>
+          resource_class: << pipeline.parameters.github_prerelease_resource_class >>
           context: org-global
           filters:
             branches:

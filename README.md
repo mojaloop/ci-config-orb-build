@@ -42,6 +42,7 @@ workflows:
           # grype_scan_resource_class: medium
           # release_resource_class: medium
           # github_release_resource_class: medium
+          # github_prerelease_resource_class: medium
           # publish_docker_resource_class: medium
           # publish_npm_resource_class: medium
           # publish_docker_snapshot_resource_class: medium

@@ -1,0 +1,57 @@
+description: |
+  This job creates a Github pre-release for the project when a prerelease tag
+  (e.g. v1.2.3-snapshot.1, v1.2.3-hotfix.1, v1.2.3-perf.1) is pushed.
+executor:
+  name: machine
+  resource_class: << parameters.resource_class >>
+shell: "/bin/bash -eo pipefail"
+environment:
+  MAIN_BRANCH_NAME: main
+parameters:
+  resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+steps:
+  - run:
+      name: Install git
+      command: |
+        sudo apt-get update && sudo apt-get install -y git
+  - gh/install
+  - checkout
+  - attach_workspace:
+      at: /tmp
+  - run:
+      name: Format the changelog into the github release body and get release tag
+      command: |
+        git diff --no-indent-heuristic HEAD~1 HEAD CHANGELOG.md 2>/dev/null | sed -n '/^+[^+]/ s/^+//p' > /tmp/changes || true
+        # changelog updates are skipped for snapshots, so the diff is usually empty
+        if [ ! -s /tmp/changes ]; then
+          echo "Prerelease" > /tmp/changes
+        fi
+        echo 'export RELEASE_CHANGES=`cat /tmp/changes`' >> $BASH_ENV
+        echo 'export RELEASE_TAG=`cat package.json | jq -r .version`' >> $BASH_ENV
+  - run:
+      name: Check the release changes
+      command: |
+        echo "Changes are: ${RELEASE_CHANGES}"
+  - run:
+      name: Create Pre-release
+      command: |
+        gh release create "v${RELEASE_TAG}" --prerelease --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} --title "v${RELEASE_TAG} Release" --draft=false --notes "${RELEASE_CHANGES}" ./CHANGELOG.md
+  - run:
+      name: Upload Release Assets
+      command: |
+        RELEASE_ASSETS_DIR="/tmp/release-assets"
+        if [ -d "$RELEASE_ASSETS_DIR" ] && [ "$(ls -A $RELEASE_ASSETS_DIR 2>/dev/null)" ]; then
+          echo "Found release assets in workspace:"
+          ls -la "$RELEASE_ASSETS_DIR"
+          for asset in "$RELEASE_ASSETS_DIR"/*; do
+            if [ -f "$asset" ]; then
+              echo "Uploading: $(basename "$asset")"
+              gh release upload "v${RELEASE_TAG}" "$asset" --repo ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+            fi
+          done
+        else
+          echo "No release assets found in workspace, skipping..."
+        fi
