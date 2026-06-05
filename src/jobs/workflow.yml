@@ -65,6 +65,10 @@ parameters:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
+  github_prerelease_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
   publish_docker_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
@@ -115,6 +119,7 @@ steps:
           "grype_scan_resource_class":"<< parameters.grype_scan_resource_class>>",
           "release_resource_class":"<< parameters.release_resource_class>>",
           "github_release_resource_class":"<< parameters.github_release_resource_class>>",
+          "github_prerelease_resource_class":"<< parameters.github_prerelease_resource_class>>",
           "publish_docker_resource_class":"<< parameters.publish_docker_resource_class>>",
           "publish_npm_resource_class":"<< parameters.publish_npm_resource_class>>",
           "publish_docker_snapshot_resource_class":"<< parameters.publish_docker_snapshot_resource_class>>",

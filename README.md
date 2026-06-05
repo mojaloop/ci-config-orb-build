@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@1.1.17
+  build: mojaloop/build@1.1.20
 workflows:
   setup:
     jobs:
@@ -42,6 +42,7 @@ workflows:
           # grype_scan_resource_class: medium
           # release_resource_class: medium
           # github_release_resource_class: medium
+          # github_prerelease_resource_class: medium
           # publish_docker_resource_class: medium
           # publish_npm_resource_class: medium
           # publish_docker_snapshot_resource_class: medium
