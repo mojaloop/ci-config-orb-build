@@ -144,6 +144,9 @@ This feature is particularly useful for:
 - If a `package.json` is present in the root of the repository and it does not have
   private=true, the package will be published to npm for
   the applicable branches and tags.
+- If a `release:assets` script is present in `package.json`, it is run during
+  the build with the output directory as its argument, and the files it
+  produces there are uploaded as assets to the GitHub release/prerelease.
 - The following scripts are expected in the `package.json` file:
   - `lint`
   - `dep:check`
