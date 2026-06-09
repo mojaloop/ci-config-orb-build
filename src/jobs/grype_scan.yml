@@ -185,9 +185,13 @@ steps:
           exit 1
         fi
 
-        # Validate JSON format
-        if ! jq empty grype-results.json 2>/dev/null; then
-          echo "Error: Grype scan produced invalid JSON"
+        # Validate JSON format AND schema.
+        # jq -e fails if grype-results.json is invalid JSON OR if '.matches' is not an
+        # array (null/missing) — catching valid-but-wrong-shape output that would
+        # otherwise break the downstream '.matches[]?' vulnerability counting.
+        if ! jq -e '.matches | type == "array"' grype-results.json >/dev/null 2>&1; then
+          echo "Error: Grype scan produced invalid output or missing 'matches' array"
+          echo "=== grype-results.json (first 20 lines) ==="
           head -20 grype-results.json || true
           echo "=== grype-json-errors.log (first 200 lines) ==="
           sed -n '1,200p' grype-json-errors.log || true
