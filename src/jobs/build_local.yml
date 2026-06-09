@@ -29,14 +29,27 @@ steps:
       name: Build Docker local image
       command: |
         source ~/.profile
-        export DOCKER_NODE_VERSION="$NVMRC_VERSION-alpine3.21"
-        echo "export DOCKER_NODE_VERSION=$NVMRC_VERSION-alpine3.21" >> $BASH_ENV
+        export DOCKER_NODE_VERSION="$NVMRC_VERSION-alpine3.23"
+        echo "export DOCKER_NODE_VERSION=$NVMRC_VERSION-alpine3.23" >> $BASH_ENV
         echo "Building Docker image: ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local --build-arg NODE_VERSION=$DOCKER_NODE_VERSION"
         docker build -t ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local --build-arg NODE_VERSION=$DOCKER_NODE_VERSION .
   - run:
       name: Save docker image to workspace
       command: docker save -o /tmp/docker-image.tar ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local
+  - run:
+      name: Build Release Assets
+      command: |
+        if npm run 2>/dev/null | grep -q "release:assets"; then
+          echo "Found release:assets script, building assets..."
+          mkdir -p /tmp/release-assets
+          npm run release:assets -- /tmp/release-assets
+          echo "Assets built:"
+          ls -la /tmp/release-assets
+        else
+          echo "No release:assets script found, skipping..."
+        fi
   - persist_to_workspace:
       root: /tmp
       paths:
         - ./docker-image.tar
+        - ./release-assets
