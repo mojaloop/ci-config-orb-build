@@ -1,6 +1,9 @@
 description: |
-  This job is responsible for scanning the licenses of the docker image
-  built in the previous job.
+  Scans the licenses of the docker image built in the previous job.
+
+  The orb generates a CycloneDX SBOM from the loaded image with Syft
+  (generate_sbom), then gates it with @mojaloop/license-scanner-tool against the
+  Mojaloop SPDX allowlist (license_gate). The SBOM is kept and stored as an artifact.
 executor:
   name: machine
   resource_class: << parameters.resource_class >>
@@ -19,10 +22,14 @@ steps:
   - run:
       name: Load the pre-built docker image from workspace
       command: docker load -i /tmp/docker-image.tar
-  - license_scanner
-  - run:
-      name: Run the license-scanner
-      command: cd /tmp/license-scanner && mode=docker dockerImages=${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local make run
+  - configure_nvm
+  - generate_sbom:
+      target: "${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local"
+      output: /tmp/sbom.cdx.json
+  # Store the SBOM before the gate so it is always uploaded, including when the
+  # gate fails on a license violation (a failed step halts the rest of the job).
   - store_artifacts:
-      path: /tmp/license-scanner/results
-      destination: licenses
+      path: /tmp/sbom.cdx.json
+      destination: sbom
+  - license_gate:
+      sbom: /tmp/sbom.cdx.json
