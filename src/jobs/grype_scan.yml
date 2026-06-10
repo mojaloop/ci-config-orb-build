@@ -10,6 +10,12 @@ parameters:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
+  grype_version:
+    type: string
+    default: "v0.114.0"
+  syft_version:
+    type: string
+    default: "v1.45.0"
 steps:
   - checkout
   - attach_workspace:
@@ -83,7 +89,7 @@ steps:
       name: Install Grype
       command: |
         echo "Installing Grype vulnerability scanner..."
-        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
+        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin << parameters.grype_version >>
 
         # Verify installation succeeded
         if ! command -v grype &> /dev/null; then
@@ -130,7 +136,7 @@ steps:
           # Ensure syft is present (install if missing)
           if ! command -v syft &> /dev/null; then
             echo "syft not found — installing..."
-            curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+            curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin << parameters.syft_version >>
           fi
 
           # Generate SBOM
@@ -211,16 +217,17 @@ steps:
   - run:
       name: Check for critical, high and medium vulnerabilities
       command: |
+        set -euo pipefail
+
         # Validate JSON before processing
         if ! jq empty grype-results.json 2>/dev/null; then
           echo "Error: Invalid JSON in grype-results.json"
           exit 1
         fi
 
-        # Count vulnerabilities in the filtered results (handle missing matches array)
-        CRITICAL_COUNT=$(jq '[.matches[]? | select(.vulnerability.severity == "Critical")] | length' grype-results.json || echo "0")
-        HIGH_COUNT=$(jq '[.matches[]? | select(.vulnerability.severity == "High")] | length' grype-results.json || echo "0")
-        MEDIUM_COUNT=$(jq '[.matches[]? | select(.vulnerability.severity == "Medium")] | length' grype-results.json || echo "0")
+        CRITICAL_COUNT=$(jq '[.matches[]? | select(.vulnerability.severity == "Critical")] | length' grype-results.json)
+        HIGH_COUNT=$(jq '[.matches[]? | select(.vulnerability.severity == "High")] | length' grype-results.json)
+        MEDIUM_COUNT=$(jq '[.matches[]? | select(.vulnerability.severity == "Medium")] | length' grype-results.json)
 
         echo "Critical vulnerabilities found: $CRITICAL_COUNT"
         echo "High vulnerabilities found: $HIGH_COUNT"
