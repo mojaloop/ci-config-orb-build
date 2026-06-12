@@ -1,0 +1,24 @@
+description: >
+  Gate a CycloneDX SBOM against the Mojaloop license allowlist using the published
+  @mojaloop/license-scanner-tool package (Node). Fails the build on any npm
+  dependency whose licence is not on the allowlist or cannot be resolved to an
+  SPDX id. Requires node + npm on the executor (present on the Alpine node image;
+  ensure via configure_nvm on the machine executor).
+parameters:
+  sbom:
+    type: string
+    default: "/tmp/sbom.cdx.json"
+    description: Path to the CycloneDX SBOM to gate (produced by generate_sbom).
+  version:
+    type: string
+    default: "1.0.0"
+    description: >
+      Exact published @mojaloop/license-scanner-tool version to run. Pin exactly
+      (not a range) for supply-chain safety; bump deliberately per orb release to
+      the current released tool version.
+steps:
+  - run:
+      name: License gate (@mojaloop/license-scanner-tool)
+      command: |
+        set -e
+        npx --yes @mojaloop/license-scanner-tool@<< parameters.version >> "<< parameters.sbom >>"
