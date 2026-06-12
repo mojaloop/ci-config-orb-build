@@ -6,9 +6,11 @@ steps:
       command: |
         ## Add Package Repos
         ## Ref: https://docs.confluent.io/platform/current/installation/installing_cp/deb-ubuntu.html#get-the-software
-        wget -qO - https://packages.confluent.io/deb/7.4/archive.key | sudo apt-key add -
-        sudo add-apt-repository -y "deb https://packages.confluent.io/clients/deb $(lsb_release -cs) main"
+        sudo install -m 0755 -d /etc/apt/keyrings
+        wget -qO - https://packages.confluent.io/deb/7.4/archive.key | sudo gpg --dearmor -o /etc/apt/keyrings/confluent.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/confluent.gpg] https://packages.confluent.io/clients/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/confluent.list
 
         ## Install deps
+        sudo apt-get update
         sudo apt install -y librdkafka-dev curl bash musl-dev libsasl2-dev
         sudo ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
