@@ -11,7 +11,7 @@ parameters:
     description: Path to the CycloneDX SBOM to gate (produced by generate_sbom).
   version:
     type: string
-    default: "1.1.0"
+    default: "1.1.1"
     description: >
       Exact published @mojaloop/license-scanner-tool version to run. Pin exactly
       (not a range) for supply-chain safety; bump deliberately per orb release to
