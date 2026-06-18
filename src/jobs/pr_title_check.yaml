@@ -2,9 +2,28 @@ executor:
   name: docker
   resource_class: << parameters.resource_class >>
 parameters:
+  commitlint-version:
+    type: string
+    default: "21.0.2"
+    description: >
+      Exact @commitlint/cli + config-conventional version to run (pin exactly;
+      see the pr_title_check command).
+  get-help-url:
+    type: string
+    default: "https://docs.mojaloop.io/community/standards/creating-new-features.html"
+    description: Help URL surfaced to the contributor when a PR title is invalid.
+  fail-silently-when-no-pr:
+    type: boolean
+    default: true
+    description: >
+      Pass (exit 0) when CIRCLE_PULL_REQUEST is unset — e.g. tag or branch builds
+      not associated with a pull request.
   ci-config-branch:
-    description: The branch of mojaloop/ci-config to bootstrap from
-    default: master
+    description: >
+      [DEPRECATED] No longer used. pr-title now runs upstream commitlint instead
+      of cloning mojaloop/ci-config. Retained for backward compatibility with
+      callers that still pass it.
+    default: ""
     type: string
   resource_class:
     type: enum
@@ -12,4 +31,7 @@ parameters:
     default: medium
 steps:
   - pr_title_check:
+      commitlint-version: << parameters.commitlint-version >>
+      get-help-url: << parameters.get-help-url >>
+      fail-silently-when-no-pr: << parameters.fail-silently-when-no-pr >>
       ci-config-branch: << parameters.ci-config-branch >>

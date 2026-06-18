@@ -1,24 +1,102 @@
-description: Check the title of a Github pull request
+description: >
+  Validate a GitHub pull request title against the Conventional Commits spec
+  using commitlint with @commitlint/config-conventional (pinned). There is no
+  runtime clone of mojaloop/ci-config and no bespoke package — the ruleset comes
+  from upstream commitlint. The PR title is fetched from the GitHub API
+  authenticated with GH_TOKEN / GITHUB_TOKEN (matches the post-#44 behavior:
+  authenticated requests use GitHub's 5,000/hr limit rather than the 60/hr
+  unauthenticated, per-IP limit). Requires node + npm on the executor (present on
+  the Alpine node image).
 parameters:
+  commitlint-version:
+    type: string
+    default: "21.0.2"
+    description: >
+      Exact @commitlint/cli and @commitlint/config-conventional version to
+      install and run. Pin exactly (not a range) for supply-chain safety; bump
+      deliberately per orb release.
+  get-help-url:
+    type: string
+    default: "https://docs.mojaloop.io/community/standards/creating-new-features.html"
+    description: Help URL surfaced to the contributor when a PR title is invalid.
+  fail-silently-when-no-pr:
+    type: boolean
+    default: true
+    description: >
+      Pass (exit 0) when CIRCLE_PULL_REQUEST is unset — e.g. tag or branch builds
+      not associated with a pull request.
   ci-config-branch:
     type: string
+    default: ""
+    description: >
+      [DEPRECATED] No longer used. pr-title now runs upstream commitlint instead
+      of cloning mojaloop/ci-config. Retained as an accepted-but-ignored
+      parameter for backward compatibility with callers that still pass it.
 steps:
   - run:
-      name: Install general dependencies
+      name: Validate PR title (Conventional Commits)
+      environment:
+        GET_HELP_URL: << parameters.get-help-url >>
+        FAIL_SILENTLY_WHEN_NO_PR: "<< parameters.fail-silently-when-no-pr >>"
+        COMMITLINT_VERSION: "<< parameters.commitlint-version >>"
       command: |
-        apk --no-cache add git ca-certificates curl openssh-client
-        apk add --no-cache -t build-dependencies make gcc g++ python3 py3-setuptools libtool autoconf automake jq
-  # Orbs don't let you package anything more than basic shell scripts
-  # so we bootstrap this orb by checking out the code in the repo
-  # TODO: checkout based on deterministic git tag
-  - run:
-      name: checkout ci-config repo
-      command: |
-        git clone -b << parameters.ci-config-branch >> https://github.com/mojaloop/ci-config.git
-        cd ci-config/pr-tools && npm install
-  - run:
-      name: Check the PR title
-      command: |
-        echo "env CIRCLE_PULL_REQUESTS: ${CIRCLE_PULL_REQUESTS}"
-        echo "env CIRCLE_PULL_REQUEST: ${CIRCLE_PULL_REQUEST}"
-        cd ci-config/pr-tools && npm run pr-title
+        set -eu
+
+        echo "CIRCLE_PULL_REQUEST: ${CIRCLE_PULL_REQUEST:-<none>}"
+
+        # Skip on builds with no associated PR (tag builds, direct branch builds).
+        if [ -z "${CIRCLE_PULL_REQUEST:-}" ]; then
+          if [ "${FAIL_SILENTLY_WHEN_NO_PR}" = "true" ]; then
+            echo "No PR associated with this build; skipping PR-title check."
+            exit 0
+          fi
+          echo "ERROR: No CIRCLE_PULL_REQUEST and fail-silently-when-no-pr is false."
+          exit 1
+        fi
+
+        # Fetch the PR title from the GitHub API, authenticated via the org-global
+        # token (GH_TOKEN / GITHUB_TOKEN). Authenticated => 5,000 req/hr, matching
+        # the post-#44 behavior and avoiding the 60/hr unauthenticated per-IP limit.
+        TITLE="$(node -e '
+          var https = require("https");
+          var url = process.env.CIRCLE_PULL_REQUEST || "";
+          var m = url.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/);
+          if (!m) { console.error("Could not parse PR URL: " + url); process.exit(2); }
+          var owner = m[1], repo = m[2], num = m[3];
+          var token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || "";
+          var headers = { "User-Agent": "mojaloop-build", "Accept": "application/vnd.github+json" };
+          if (token) { headers.Authorization = "Bearer " + token; }
+          https.get("https://api.github.com/repos/" + owner + "/" + repo + "/pulls/" + num, { headers: headers }, function (res) {
+            var body = "";
+            res.on("data", function (d) { body += d; });
+            res.on("end", function () {
+              if (res.statusCode !== 200) {
+                var hint = (res.statusCode === 403 || res.statusCode === 429) ? " (rate limit / auth - ensure GH_TOKEN or GITHUB_TOKEN is set in the context)" : "";
+                console.error("GitHub API returned " + res.statusCode + hint + ": " + body.slice(0, 300));
+                process.exit(1);
+              }
+              try { process.stdout.write(JSON.parse(body).title); }
+              catch (e) { console.error("Could not parse GitHub API response."); process.exit(1); }
+            });
+          }).on("error", function (e) { console.error("Request failed: " + e.message); process.exit(1); });
+        ')"
+        echo "PR title: ${TITLE}"
+
+        # Lint with pinned commitlint. @commitlint/resolve-extends loads
+        # config-conventional from the CWD's node_modules, so install both into a
+        # throwaway dir and run commitlint from there.
+        WORKDIR="$(mktemp -d)"
+        cd "${WORKDIR}"
+        npm init -y >/dev/null 2>&1
+        npm install --no-audit --no-fund \
+          "@commitlint/cli@${COMMITLINT_VERSION}" \
+          "@commitlint/config-conventional@${COMMITLINT_VERSION}" >/dev/null
+
+        if printf '%s' "${TITLE}" | ./node_modules/.bin/commitlint --extends @commitlint/config-conventional; then
+          echo "PR title is valid."
+        else
+          echo ""
+          echo "PR title '${TITLE}' does not follow the Conventional Commits spec."
+          echo "See: ${GET_HELP_URL}"
+          exit 1
+        fi
