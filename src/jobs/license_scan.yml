@@ -1,30 +1,29 @@
 description: |
-  Scans the licenses of the docker image built in the previous job.
+  Checks the licenses of the project's dependencies (source scan).
 
-  The orb generates a CycloneDX SBOM from the loaded image with Syft
+  The orb generates a CycloneDX SBOM from the source tree with Syft
   (generate_sbom), then gates it with @mojaloop/license-scanner-tool against the
   Mojaloop SPDX allowlist (license_gate). The SBOM is kept and stored as an artifact.
 executor:
-  name: machine
+  name: docker
   resource_class: << parameters.resource_class >>
+environment:
+  MAIN_BRANCH_NAME: main
 parameters:
+  yarn_lock:
+    type: string
+    default: ''
   resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
-environment:
-  MAIN_BRANCH_NAME: main
 steps:
+  - docker_dependencies
   - checkout
-  - check_dockerfile
-  - attach_workspace:
-      at: /tmp
-  - run:
-      name: Load the pre-built docker image from workspace
-      command: docker load -i /tmp/docker-image.tar
-  - configure_nvm
+  - restore_cache_command:
+      yarn_lock: << parameters.yarn_lock >>
   - generate_sbom:
-      target: "${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local"
+      target: "dir:."
       output: /tmp/sbom.cdx.json
   # Store the SBOM before the gate so it is always uploaded, including when the
   # gate fails on a license violation (a failed step halts the rest of the job).

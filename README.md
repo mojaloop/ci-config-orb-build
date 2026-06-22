@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@2.1.2
+  build: mojaloop/build@2.1.3
 workflows:
   setup:
     jobs:
@@ -34,11 +34,10 @@ workflows:
           # test_unit_resource_class: medium
           # test_coverage_resource_class: medium
           # vulnerability_check_resource_class: medium
-          # license_audit_resource_class: medium
+          # license_scan_resource_class: medium
           # build_local_resource_class: medium
           # test_integration_resource_class: medium
           # test_functional_resource_class: medium
-          # license_scan_resource_class: medium
           # grype_scan_resource_class: medium
           # release_resource_class: medium
           # github_release_resource_class: medium

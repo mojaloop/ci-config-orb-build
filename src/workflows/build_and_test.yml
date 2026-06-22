@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@2.1.2
+  build: mojaloop/build@2.1.3
 parameters:
   git_tag:
     type: string
@@ -49,7 +49,7 @@ parameters:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
-  license_audit_resource_class:
+  license_scan_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
@@ -62,10 +62,6 @@ parameters:
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
   test_functional_resource_class:
-    type: enum
-    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
-    default: medium
-  license_scan_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
@@ -173,10 +169,10 @@ workflows:
           <<: *test-condition
           name: Vulnerability check
           resource_class: << pipeline.parameters.vulnerability_check_resource_class >>
-      - build/audit_licenses:
+      - build/license_scan:
           <<: *test-condition
-          name: License audit
-          resource_class: << pipeline.parameters.license_audit_resource_class >>
+          name: License scan
+          resource_class: << pipeline.parameters.license_scan_resource_class >>
       - build/build_local:
           <<: *test-condition
           name: Build
@@ -193,17 +189,6 @@ workflows:
           <<: *test-docker
           name: Functional tests
           resource_class: << pipeline.parameters.test_functional_resource_class >>
-      - build/license_scan:
-          name: License scan
-          resource_class: << pipeline.parameters.license_scan_resource_class >>
-          context: org-global
-          filters:
-            branches:
-              ignore:
-                - /.*/
-            tags: *setup-tags
-          requires:
-            - Build
       - build/grype_scan:
           name: Grype scan
           resource_class: << pipeline.parameters.grype_scan_resource_class >>
@@ -233,7 +218,6 @@ workflows:
             - Functional tests
             - Coverage
             - Vulnerability check
-            - License audit
             - License scan
             - Grype scan
       - build/github_release:
@@ -306,7 +290,6 @@ workflows:
             - Unit tests
             - Integration tests
             - Functional tests
-            - License audit
             - License scan
             - Grype scan
       - build/publish_docker_prerelease:
