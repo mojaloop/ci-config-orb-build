@@ -33,7 +33,7 @@ parameters:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
-  license_audit_resource_class:
+  license_scan_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
@@ -46,10 +46,6 @@ parameters:
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
   test_functional_resource_class:
-    type: enum
-    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
-    default: medium
-  license_scan_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
@@ -111,11 +107,10 @@ steps:
           "test_unit_resource_class":"<< parameters.test_unit_resource_class>>",
           "test_coverage_resource_class":"<< parameters.test_coverage_resource_class>>",
           "vulnerability_check_resource_class":"<< parameters.vulnerability_check_resource_class>>",
-          "license_audit_resource_class":"<< parameters.license_audit_resource_class>>",
+          "license_scan_resource_class":"<< parameters.license_scan_resource_class>>",
           "build_local_resource_class":"<< parameters.build_local_resource_class>>",
           "test_integration_resource_class":"<< parameters.test_integration_resource_class>>",
           "test_functional_resource_class":"<< parameters.test_functional_resource_class>>",
-          "license_scan_resource_class":"<< parameters.license_scan_resource_class>>",
           "grype_scan_resource_class":"<< parameters.grype_scan_resource_class>>",
           "release_resource_class":"<< parameters.release_resource_class>>",
           "github_release_resource_class":"<< parameters.github_release_resource_class>>",
