@@ -15,6 +15,7 @@ parameters:
     default: medium
 steps:
   - checkout
+  - configure_nvm
   - attach_workspace:
       at: /tmp
   - run:
@@ -25,7 +26,9 @@ steps:
         fi
   - run:
       name: Execute TTK functional tests
-      command: npm run test:functional
+      command: |
+        nvm use default
+        npm run test:functional
   - store_artifacts:
       path: /tmp/ml-core-test-harness/reports
       destination: test
