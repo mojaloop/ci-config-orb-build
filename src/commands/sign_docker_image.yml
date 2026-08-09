@@ -1,0 +1,59 @@
+description: >
+  Sign a published Docker image using Cosign and the image's immutable digest.
+
+parameters:
+  cosign_version:
+    type: string
+    default: "v3.1.3"
+    description: Pinned Cosign release installed when Cosign is not already present.
+
+steps:
+  - run:
+      name: Install Cosign (pinned) if missing
+      command: |
+        set -e
+
+        if command -v cosign >/dev/null 2>&1; then
+          cosign version
+          exit 0
+        fi
+
+        BINDIR=/usr/local/bin
+
+        if [ -w "$BINDIR" ]; then
+          SUDO=
+        else
+          SUDO=sudo
+        fi
+
+        curl -sSfL \
+          "https://github.com/sigstore/cosign/releases/download/<< parameters.cosign_version >>/cosign-linux-amd64" \
+          -o /tmp/cosign
+
+        $SUDO install /tmp/cosign "$BINDIR/cosign"
+
+        cosign version
+
+  - run:
+      name: Sign Docker image
+      command: |
+        set -e
+
+        KEY_FILE=/tmp/cosign.key
+
+        cleanup() {
+          rm -f "$KEY_FILE"
+        }
+
+        trap cleanup EXIT
+
+        echo "$COSIGN_PRIVATE_KEY_BASE64" \
+          | base64 --decode \
+          > "$KEY_FILE"
+
+        chmod 600 "$KEY_FILE"
+
+        cosign sign \
+          --yes \
+          --key "$KEY_FILE" \
+          "$IMAGE_DIGEST"
