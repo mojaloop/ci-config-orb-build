@@ -5,41 +5,159 @@ parameters:
   cosign_version:
     type: string
     default: "v3.1.3"
-    description: Pinned Cosign release installed when Cosign is not already present.
+    description: Pinned Cosign release used for Docker image signing.
 
 steps:
   - run:
-      name: Install Cosign (pinned) if missing
+      name: Install and verify Cosign
       command: |
-        set -e
+        set -euo pipefail
 
-        if command -v cosign >/dev/null 2>&1; then
+        COSIGN_VERSION="<< parameters.cosign_version >>"
+
+        # Verification flow adapted from the official
+        # sigstore/cosign-installer implementation.
+        BOOTSTRAP_VERSION="v3.0.6"
+        BOOTSTRAP_SHA256="c956e5dfcac53d52bcf058360d579472f0c1d2d9b69f55209e256fe7783f4c74"
+        RELEASE_KEY_SHA256="f4cea466e5e887a45da5031757fa1d32655d83420639dc1758749b744179f126"
+
+        if ! [[ "$COSIGN_VERSION" =~ ^v3\.[0-9]+\.[0-9]+$ ]]; then
+          echo "ERROR: Unsupported Cosign version: $COSIGN_VERSION"
+          echo "This installer currently supports Cosign v3 releases."
+          exit 1
+        fi
+
+        VERSION_NUM="${COSIGN_VERSION#v}"
+
+        if [ "$(printf '%s\n' "3.0.3" "$VERSION_NUM" | sort -V | head -n1)" != "3.0.3" ]; then
+          echo "ERROR: Cosign versions below v3.0.3 are not supported."
+          exit 1
+        fi
+
+        BINDIR="/usr/local/bin"
+        WORKDIR="$(mktemp -d)"
+
+        cleanup() {
+          rm -rf "$WORKDIR"
+        }
+
+        trap cleanup EXIT
+
+        if [ -w "$BINDIR" ]; then
+          SUDO=""
+        else
+          SUDO="sudo"
+        fi
+
+        #
+        # Download and verify the trusted bootstrap Cosign binary.
+        #
+        curl --retry 3 \
+          --proto '=https' \
+          --proto-redir '=https' \
+          --tlsv1.2 \
+          -fsSL \
+          "https://github.com/sigstore/cosign/releases/download/${BOOTSTRAP_VERSION}/cosign-linux-amd64" \
+          -o "${WORKDIR}/cosign-bootstrap"
+
+        BOOTSTRAP_ACTUAL_SHA256="$(
+          sha256sum "${WORKDIR}/cosign-bootstrap" | awk '{print $1}'
+        )"
+
+        if [ "$BOOTSTRAP_ACTUAL_SHA256" != "$BOOTSTRAP_SHA256" ]; then
+          echo "ERROR: Cosign bootstrap SHA256 verification failed"
+          exit 1
+        fi
+
+        chmod +x "${WORKDIR}/cosign-bootstrap"
+
+        #
+        # If the requested version is the trusted bootstrap version,
+        # install it directly.
+        #
+        if [ "$COSIGN_VERSION" = "$BOOTSTRAP_VERSION" ]; then
+          $SUDO install "${WORKDIR}/cosign-bootstrap" "$BINDIR/cosign"
           cosign version
           exit 0
         fi
 
-        BINDIR=/usr/local/bin
+        #
+        # Download requested Cosign release.
+        #
+        curl --retry 3 \
+          --proto '=https' \
+          --proto-redir '=https' \
+          --tlsv1.2 \
+          -fsSL \
+          "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64" \
+          -o "${WORKDIR}/cosign"
 
-        if [ -w "$BINDIR" ]; then
-          SUDO=
-        else
-          SUDO=sudo
+        #
+        # Download and verify the Cosign release public key.
+        #
+        curl --retry 3 \
+          --proto '=https' \
+          --proto-redir '=https' \
+          --tlsv1.2 \
+          -fsSL \
+          "https://raw.githubusercontent.com/sigstore/cosign/${COSIGN_VERSION}/release/release-cosign.pub" \
+          -o "${WORKDIR}/release-cosign.pub"
+
+        RELEASE_KEY_ACTUAL_SHA256="$(
+          sha256sum "${WORKDIR}/release-cosign.pub" | awk '{print $1}'
+        )"
+
+        if [ "$RELEASE_KEY_ACTUAL_SHA256" != "$RELEASE_KEY_SHA256" ]; then
+          echo "ERROR: Cosign release public key SHA256 verification failed"
+          exit 1
         fi
 
-        curl -sSfL \
-          "https://github.com/sigstore/cosign/releases/download/<< parameters.cosign_version >>/cosign-linux-amd64" \
-          -o /tmp/cosign
+        #
+        # Verify the keyless Sigstore release bundle.
+        #
+        curl --retry 3 \
+          --proto '=https' \
+          --proto-redir '=https' \
+          --tlsv1.2 \
+          -fsSL \
+          "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64.sigstore.json" \
+          -o "${WORKDIR}/cosign-linux-amd64.sigstore.json"
 
-        $SUDO install /tmp/cosign "$BINDIR/cosign"
+        "${WORKDIR}/cosign-bootstrap" verify-blob \
+          --certificate-identity="keyless@projectsigstore.iam.gserviceaccount.com" \
+          --certificate-oidc-issuer="https://accounts.google.com" \
+          --bundle "${WORKDIR}/cosign-linux-amd64.sigstore.json" \
+          "${WORKDIR}/cosign"
+
+        #
+        # Verify the KMS-backed Sigstore release bundle.
+        #
+        curl --retry 3 \
+          --proto '=https' \
+          --proto-redir '=https' \
+          --tlsv1.2 \
+          -fsSL \
+          "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64-kms.sigstore.json" \
+          -o "${WORKDIR}/cosign-linux-amd64-kms.sigstore.json"
+
+        "${WORKDIR}/cosign-bootstrap" verify-blob \
+          --key "${WORKDIR}/release-cosign.pub" \
+          --bundle "${WORKDIR}/cosign-linux-amd64-kms.sigstore.json" \
+          "${WORKDIR}/cosign"
+
+        #
+        # Install only after verification succeeds.
+        #
+        $SUDO install "${WORKDIR}/cosign" "$BINDIR/cosign"
 
         cosign version
 
   - run:
       name: Sign Docker image
       command: |
-        set -e
+        set -euo pipefail
 
-        KEY_FILE=/tmp/cosign.key
+        KEY_FILE="/tmp/cosign.key"
 
         cleanup() {
           rm -f "$KEY_FILE"
