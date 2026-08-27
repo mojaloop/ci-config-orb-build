@@ -1,5 +1,7 @@
 description: |
   This job publishes the Docker image built in the previous job to Docker Hub.
+// Switching to Keyless OIDC Signing (Cosign v2 + CircleCI)
+oidc_token: true
 executor:
   name: machine
   resource_class: << parameters.resource_class >>
