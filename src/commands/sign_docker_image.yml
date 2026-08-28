@@ -153,27 +153,13 @@ steps:
         cosign version
 
   - run:
-      name: Sign Docker image
+      name: Sign Docker image (keyless)
       command: |
         set -euo pipefail
 
-        KEY_FILE="/tmp/cosign.key"
-
-        cleanup() {
-          rm -f "$KEY_FILE"
-        }
-
-        trap cleanup EXIT
-
-        echo "$COSIGN_PRIVATE_KEY_BASE64" \
-          | base64 --decode \
-          > "$KEY_FILE"
-
-        chmod 600 "$KEY_FILE"
-
         cosign sign \
           --yes \
-          --key "$KEY_FILE" \
           "$IMAGE_DIGEST"
+
 
 
