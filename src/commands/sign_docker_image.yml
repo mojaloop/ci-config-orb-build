@@ -160,6 +160,3 @@ steps:
         cosign sign \
           --yes \
           "$IMAGE_DIGEST"
-
-
-
