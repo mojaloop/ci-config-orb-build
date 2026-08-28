@@ -157,6 +157,19 @@ steps:
       command: |
         set -euo pipefail
 
+        echo "Preparing CircleCI OIDC token for keyless signing..."
+
+        SIGSTORE_ID_TOKEN="$(circleci run oidc get --claims '{"aud":"sigstore"}')"
+
+        if [[ -z "$SIGSTORE_ID_TOKEN" ]]; then
+          echo "ERROR: Failed to obtain CircleCI OIDC token"
+          exit 1
+        fi
+
+        export SIGSTORE_ID_TOKEN
+
         cosign sign \
           --yes \
           "$IMAGE_DIGEST"
+
+        unset SIGSTORE_ID_TOKEN
