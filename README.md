@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@2.1.6
+  build: mojaloop/build@2.1.7
 workflows:
   setup:
     jobs:
@@ -140,6 +140,10 @@ This feature is particularly useful for:
 
 - If a `Dockerfile` is present in the root of the repository, it will be used to
   build and publish an image.
+- Published Docker images are signed using Cosign with CircleCI OIDC. Docker image
+  signing requires a CircleCI environment CLI that supports
+  `circleci run oidc get --claims`. The minimum tested CircleCI Build Agent version
+  is `1.0.347365-0fcae425`.
 - If a `package.json` is present in the root of the repository and it does not have
   private=true, the package will be published to npm for
   the applicable branches and tags.
@@ -154,6 +158,22 @@ This feature is particularly useful for:
   - `test:integration`
   - `test:functional`
   - `test:coverage-check`
+
+### Docker Image Verification
+
+Published Docker images are signed keylessly using Cosign and CircleCI OIDC.
+
+To verify a Mojaloop Docker image signature, use its immutable digest:
+
+```bash
+cosign verify \
+  --certificate-oidc-issuer "https://oidc.circleci.com/org/be4cb6f2-13d8-4695-a870-f39cdec0a408" \
+  --certificate-identity-regexp "^org/be4cb6f2-13d8-4695-a870-f39cdec0a408/project/.*" \
+  mojaloop/<service-name>@sha256:<digest>
+```
+
+Replace `<service-name>` and `<digest>` with the published Docker image name and
+its immutable digest.
 
 ### Publish conditions
 
