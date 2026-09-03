@@ -1,5 +1,7 @@
 description: >
   Sign a published Docker image using Cosign and the image's immutable digest.
+  Requires a CircleCI environment CLI that supports `circleci run oidc get --claims`.
+  Minimum tested CircleCI Build Agent version: 1.0.347365-0fcae425.
 
 parameters:
   cosign_version:
@@ -17,8 +19,11 @@ steps:
 
         # Verification flow adapted from the official
         # sigstore/cosign-installer implementation.
+        # BOOTSTRAP_SHA256 is tied to cosign version "v3.0.6"; change this when the cosign version changes
         BOOTSTRAP_VERSION="v3.0.6"
         BOOTSTRAP_SHA256="c956e5dfcac53d52bcf058360d579472f0c1d2d9b69f55209e256fe7783f4c74"
+        # The Sigstore release public key is a long-lived KMS key, stable across v3.x releases.
+        # Update this hash only if Sigstore rotates their release signing key.
         RELEASE_KEY_SHA256="f4cea466e5e887a45da5031757fa1d32655d83420639dc1758749b744179f126"
 
         if ! [[ "$COSIGN_VERSION" =~ ^v3\.[0-9]+\.[0-9]+$ ]]; then

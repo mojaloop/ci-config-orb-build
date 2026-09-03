@@ -63,6 +63,7 @@ steps:
         echo "export IMAGE_DIGEST=${IMAGE_DIGEST}" >> $BASH_ENV
 
   - sign_docker_image
+
   - run:
       name: Update Slack config
       command: |
