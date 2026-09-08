@@ -19,7 +19,7 @@ steps:
 
         # Verification flow adapted from the official
         # sigstore/cosign-installer implementation.
-        # BOOTSTRAP_SHA256 is tied to cosign version "v3.0.6"; change this when the cosign version changes
+        # BOOTSTRAP_SHA256 is tied to cosign version "v3.0.6"; change this when the bootstrap version changes
         BOOTSTRAP_VERSION="v3.0.6"
         BOOTSTRAP_SHA256="c956e5dfcac53d52bcf058360d579472f0c1d2d9b69f55209e256fe7783f4c74"
         # The Sigstore release public key is a long-lived KMS key, stable across v3.x releases.
