@@ -165,6 +165,8 @@ Published Docker images are signed keylessly using Cosign and CircleCI OIDC.
 
 To verify a Mojaloop Docker image signature, use its immutable digest:
 
+> **Note:** The command below is intended for Linux/WSL shells.
+
 ```bash
 cosign verify \
   --certificate-oidc-issuer "https://oidc.circleci.com/org/be4cb6f2-13d8-4695-a870-f39cdec0a408" \
