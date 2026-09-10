@@ -168,7 +168,7 @@ To verify a Mojaloop Docker image signature, use its immutable digest:
 ```bash
 cosign verify \
   --certificate-oidc-issuer "https://oidc.circleci.com/org/be4cb6f2-13d8-4695-a870-f39cdec0a408" \
-  --certificate-identity-regexp "^org/be4cb6f2-13d8-4695-a870-f39cdec0a408/project/.*" \
+  --certificate-identity-regexp "^https://circleci\.com/api/v2/projects/.*/pipeline-definitions/.*$" \
   mojaloop/<service-name>@sha256:<digest>
 ```
 
