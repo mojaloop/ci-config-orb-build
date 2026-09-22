@@ -1,0 +1,15 @@
+description: >
+  Validates that .well-known/security.txt (RFC 9116), if present in the repo,
+  has not expired. Passes with no effect for repos that don't have one yet.
+executor:
+  name: docker
+  resource_class: << parameters.resource_class >>
+parameters:
+  resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+steps:
+  - docker_dependencies
+  - checkout
+  - check_security_txt_expiry

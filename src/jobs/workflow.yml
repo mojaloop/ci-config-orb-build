@@ -53,6 +53,10 @@ parameters:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
+  check_security_txt_expiry_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
   release_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
@@ -112,6 +116,7 @@ steps:
           "test_integration_resource_class":"<< parameters.test_integration_resource_class>>",
           "test_functional_resource_class":"<< parameters.test_functional_resource_class>>",
           "grype_scan_resource_class":"<< parameters.grype_scan_resource_class>>",
+          "check_security_txt_expiry_resource_class":"<< parameters.check_security_txt_expiry_resource_class>>",
           "release_resource_class":"<< parameters.release_resource_class>>",
           "github_release_resource_class":"<< parameters.github_release_resource_class>>",
           "github_prerelease_resource_class":"<< parameters.github_prerelease_resource_class>>",
