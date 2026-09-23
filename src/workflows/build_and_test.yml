@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  build: mojaloop/build@2.1.7
+  build: mojaloop/build@2.1.8
 parameters:
   git_tag:
     type: string
@@ -66,6 +66,10 @@ parameters:
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
   grype_scan_resource_class:
+    type: enum
+    enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
+    default: medium
+  check_security_txt_expiry_resource_class:
     type: enum
     enum: ["small", "medium", "medium+", "large", "xlarge", "2xlarge", "2xlarge+"]
     default: medium
@@ -173,6 +177,12 @@ workflows:
           <<: *test-condition
           name: License scan
           resource_class: << pipeline.parameters.license_scan_resource_class >>
+      - build/check_security_txt_expiry:
+          name: Security.txt expiry
+          resource_class: << pipeline.parameters.check_security_txt_expiry_resource_class >>
+          filters: *setup-filter
+          requires:
+            - Setup
       - build/build_local:
           <<: *test-condition
           name: Build
@@ -220,6 +230,7 @@ workflows:
             - Vulnerability check
             - License scan
             - Grype scan
+            - Security.txt expiry
       - build/github_release:
           name: GitHub release
           resource_class: << pipeline.parameters.github_release_resource_class >>
@@ -292,6 +303,7 @@ workflows:
             - Functional tests
             - License scan
             - Grype scan
+            - Security.txt expiry
       - build/publish_docker_prerelease:
           name: Docker prerelease
           resource_class: << pipeline.parameters.publish_docker_prerelease_resource_class >>

@@ -16,7 +16,7 @@ project settings CircleCI. Then include the following in your `.circleci/config.
 version: 2.1
 setup: true
 orbs:
-  build: mojaloop/build@2.1.7
+  build: mojaloop/build@2.1.8
 workflows:
   setup:
     jobs:
@@ -39,6 +39,7 @@ workflows:
           # test_integration_resource_class: medium
           # test_functional_resource_class: medium
           # grype_scan_resource_class: medium
+          # check_security_txt_expiry_resource_class: medium
           # release_resource_class: medium
           # github_release_resource_class: medium
           # github_prerelease_resource_class: medium
@@ -140,6 +141,9 @@ This feature is particularly useful for:
 
 - If a `Dockerfile` is present in the root of the repository, it will be used to
   build and publish an image.
+- If a `.well-known/security.txt` file is present (RFC 9116), its `Expires`
+  field is validated and the build fails once that date has passed. Repos with
+  no security.txt, or one with no `Expires` field, are unaffected.
 - Published Docker images are signed using Cosign with CircleCI OIDC. Docker image
   signing requires a CircleCI environment CLI that supports
   `circleci run oidc get --claims`. The minimum tested CircleCI Build Agent version
