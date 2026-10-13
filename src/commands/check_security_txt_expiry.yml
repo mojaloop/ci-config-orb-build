@@ -1,0 +1,51 @@
+description: >
+  Validates the `Expires` field of `.well-known/security.txt` (RFC 9116).
+
+  If no security.txt file exists in the repo, the step halts (passes) so repos
+  that haven't adopted one yet are unaffected. If the file exists but has no
+  `Expires` field, this passes with a warning (the field is recommended, not
+  universally adopted yet). If `Expires` is present and its date is in the
+  past, the step fails the job.
+steps:
+  - run:
+      name: Check security.txt expiration
+      command: |
+        SECURITY_TXT=".well-known/security.txt"
+
+        if [ ! -f "$SECURITY_TXT" ]; then
+          echo "No $SECURITY_TXT found, skipping check."
+          circleci-agent step halt
+          exit 0
+        fi
+
+        node -e '
+          const fs = require("fs");
+          const path = ".well-known/security.txt";
+          const content = fs.readFileSync(path, "utf8");
+          const match = content.match(/^Expires:\s*(.+)$/mi);
+
+          if (!match) {
+            console.warn("WARNING: " + path + " has no Expires field (RFC 9116 requires one). Skipping.");
+            process.exit(0);
+          }
+
+          const raw = match[1].trim();
+          const expires = new Date(raw);
+
+          if (isNaN(expires.getTime())) {
+            console.error("ERROR: could not parse Expires value in " + path + ": \"" + raw + "\"");
+            console.error("Expected an RFC 3339 date-time, e.g. 2027-09-18T00:00:00.000Z");
+            process.exit(1);
+          }
+
+          const now = new Date();
+          const daysDiff = Math.floor((expires.getTime() - now.getTime()) / 86400000);
+
+          if (expires.getTime() < now.getTime()) {
+            console.error("FAIL: " + path + " expired on " + expires.toISOString() + " (" + Math.abs(daysDiff) + " day(s) ago).");
+            console.error("Update the Expires field in " + path + ".");
+            process.exit(1);
+          }
+
+          console.log("OK: " + path + " valid until " + expires.toISOString() + " (" + daysDiff + " day(s) remaining).");
+        '
