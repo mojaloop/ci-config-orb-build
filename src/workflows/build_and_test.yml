@@ -256,7 +256,7 @@ workflows:
               ignore:
                 - /.*/
             tags:
-              only: /v\d+(\.\d+){2}-(snapshot|hotfix|perf)\.\d+/
+              only: /v\d+(\.\d+){2}-(snapshot|hotfix|perf|tigerbeetle)\.\d+/
           requires: *tests
       - build/publish_npm_snapshot:
           <<: *publish-snapshot-job
@@ -273,7 +273,7 @@ workflows:
               ignore:
                 - /.*/
             tags:
-              only: /v\d+(\.\d+){2}-(snapshot|hotfix|perf)\.\d+/
+              only: /v\d+(\.\d+){2}-(snapshot|hotfix|perf|tigerbeetle)\.\d+/
           requires: *tests
       - build/publish_npm_prerelease:
           name: NPM prerelease
