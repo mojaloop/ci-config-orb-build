@@ -19,6 +19,7 @@ parameters:
 steps:
   - docker_dependencies
   - checkout
+  - configure_nvm
   - check_npm_private
   - restore_cache_command:
       yarn_lock: << parameters.yarn_lock >>

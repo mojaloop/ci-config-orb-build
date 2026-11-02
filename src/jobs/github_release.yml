@@ -21,6 +21,7 @@ steps:
         sudo apt-get update && sudo apt-get install -y git
   - gh/install
   - checkout
+  - configure_nvm
   - attach_workspace:
       at: /tmp
   - configure_git
@@ -46,6 +47,7 @@ steps:
   - run:
       name: Generate SBOM
       command: |
+        nvm use default
         if ls | grep -Eq '^sbom-v[0-9]+\.[0-9]+\.[0-9]+\.csv$'; then
           git fetch origin "$CIRCLE_BRANCH"
           git checkout -B "$CIRCLE_BRANCH" "origin/$CIRCLE_BRANCH"
