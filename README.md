@@ -144,6 +144,8 @@ This feature is particularly useful for:
   `<.nvmrc version>-alpine`: the Node `.nvmrc` names, on the latest Alpine its
   image is built on. A default such as `ARG NODE_VERSION=lts-alpine` serves a
   build that passes no version.
+- If `package.json` declares an npm version in `devEngines.packageManager`,
+  every job installs that npm before it runs npm in the repository.
 - If a `.well-known/security.txt` file is present (RFC 9116), its `Expires`
   field is validated and the build fails once that date has passed. Repos with
   no security.txt, or one with no `Expires` field, are unaffected.

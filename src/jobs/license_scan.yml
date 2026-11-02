@@ -20,6 +20,7 @@ parameters:
 steps:
   - docker_dependencies
   - checkout
+  - configure_nvm
   - restore_cache_command:
       yarn_lock: << parameters.yarn_lock >>
   - generate_sbom:
