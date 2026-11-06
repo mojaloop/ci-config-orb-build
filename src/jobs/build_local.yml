@@ -16,11 +16,12 @@ parameters:
 steps:
   - checkout
   - check_dockerfile
-  - configure_nvmrc
+  - configure_nvm
   - display_versions
   - run:
       name: Setup for pre-release
       command: |
+        nvm use default
         if [[ $CIRCLE_BRANCH =~ ^(major|minor|patch)/(.*)$ ]]; then
           echo "Pre-releasing ${BASH_REMATCH[1]} version ${BASH_REMATCH[2]}"
           npx standard-version --prerelease "${BASH_REMATCH[2]}" --release-as "${BASH_REMATCH[1]}" --message "chore(release): [ci skip] %s" --skip.changelog --no-verify
@@ -29,8 +30,8 @@ steps:
       name: Build Docker local image
       command: |
         source ~/.profile
-        export DOCKER_NODE_VERSION="$NVMRC_VERSION-alpine3.23"
-        echo "export DOCKER_NODE_VERSION=$NVMRC_VERSION-alpine3.23" >> $BASH_ENV
+        export DOCKER_NODE_VERSION="$NVMRC_VERSION-alpine"
+        echo "export DOCKER_NODE_VERSION=$NVMRC_VERSION-alpine" >> $BASH_ENV
         echo "Building Docker image: ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local --build-arg NODE_VERSION=$DOCKER_NODE_VERSION"
         docker build -t ${DOCKER_ORG:-mojaloop}/$CIRCLE_PROJECT_REPONAME:local --build-arg NODE_VERSION=$DOCKER_NODE_VERSION .
   - run:
@@ -39,7 +40,9 @@ steps:
   - run:
       name: Build Release Assets
       command: |
-        if npm run 2>/dev/null | grep -q "release:assets"; then
+        nvm use default
+        SCRIPTS=$(npm run)
+        if printf '%s\n' "$SCRIPTS" | grep -q "release:assets"; then
           echo "Found release:assets script, building assets..."
           mkdir -p /tmp/release-assets
           npm run release:assets -- /tmp/release-assets
