@@ -143,7 +143,13 @@ This feature is particularly useful for:
   build and publish an image, with the `NODE_VERSION` build argument set to
   `<.nvmrc version>-alpine`: the Node `.nvmrc` names, on the latest Alpine its
   image is built on. A default such as `ARG NODE_VERSION=lts-alpine` serves a
-  build that passes no version.
+  build that passes no version. The Dockerfile decides its base image:
+  - `FROM node:${NODE_VERSION}` follows `.nvmrc` on the latest Alpine.
+  - `FROM node:${NODE_VERSION%-alpine}-bookworm-slim` keeps the `.nvmrc`
+    version on another variant, with `# syntax=docker/dockerfile:1` as the
+    Dockerfile's first line.
+  - An image named in `FROM`, such as `FROM node:24-bookworm-slim`, is used as
+    it is.
 - If `package.json` declares an npm version in `devEngines.packageManager`,
   every job installs that npm before it runs npm in the repository.
 - If a `.well-known/security.txt` file is present (RFC 9116), its `Expires`
