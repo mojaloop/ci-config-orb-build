@@ -1,0 +1,20 @@
+description: >
+  Install the npm version the project declares in package.json
+  devEngines.packageManager. With onFail error, npm refuses every command in
+  the project (ci, install, run, exec, npx, version, pack, publish) under any
+  other version; a global install is the one it allows.
+steps:
+  - run:
+      name: Configure npm
+      command: |
+        if type nvm >/dev/null 2>&1; then nvm use default; fi
+        if [ -f package.json ]; then
+          NPM_DECLARED=$(node -p "[].concat(require('./package.json').devEngines?.packageManager ?? []).find((m) => m.name === 'npm')?.version ?? ''")
+        fi
+        if [ -n "$NPM_DECLARED" ]; then
+          echo "==> Installing npm $NPM_DECLARED"
+          npm install --global "npm@$NPM_DECLARED"
+          echo "npm: $(npm --version)"
+        else
+          echo "==> No npm declared in package.json, keeping npm $(npm --version)"
+        fi
