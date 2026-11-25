@@ -136,11 +136,12 @@ steps:
       name: Merge additional workflows
       command: |
         if [ -f .circleci/additional-workflows.yaml ]; then
-          # Install yq for YAML processing
-          sudo apt-get update && sudo apt-get install -y jq
-          wget https://github.com/mikefarah/yq/releases/download/v4.43.1/yq_linux_amd64 -O /tmp/yq
-          chmod +x /tmp/yq
-          /tmp/yq eval-all '. as $item ireduce ({}; . *+ $item)' /tmp/build_and_test.yml .circleci/additional-workflows.yaml > /tmp/merged-config.yml
+          YQ_VERSION=v4.54.3
+          YQ_SHA256=129534601871538efe0ba4c5e62a34fb1d5f469bcb975c4fddeb467d82974973
+          wget -q "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" -O /tmp/yq
+          echo "${YQ_SHA256} /tmp/yq" | sha256sum -c -
+          sudo install -m 0755 /tmp/yq /usr/local/bin/yq
+          yq eval-all '. as $item ireduce ({}; . *+ $item)' /tmp/build_and_test.yml .circleci/additional-workflows.yaml > /tmp/merged-config.yml
           mv /tmp/merged-config.yml /tmp/build_and_test.yml
           cat /tmp/build_and_test.yml
         fi
